@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find ec2_bringup)/description/cameras/manta.gazebo.xacro" />
+
+  <xacro:property name="pi" value="3.1415926535897931" />
+
+  <xacro:macro name="manta_visual" params="index color">
+     <visual>
+       <origin xyz = "0 0 0" rpy = "0 ${pi} ${pi}"/>
+       <geometry>
+          <mesh filename="package://ec2_bringup/meshes/cameras/visual/manta_hull/manta_hull_${index}.stl" />
+       </geometry>
+       <material name="${color}"/>
+     </visual>
+  </xacro:macro>
+
+  <xacro:macro name="manta_collision" params="name color">
+     <collision>
+       <origin xyz = "0 0 0" rpy = "0 ${pi} ${pi}"/>
+       <geometry>
+          <mesh filename="package://ec2_bringup/meshes/cameras/collision/manta_hull/${name}.stl" />
+       </geometry>
+       <material name="${color}"/>
+     </collision>
+  </xacro:macro>
+
+  <xacro:macro name="manta" params="parent_link name *origin">
+    <joint name="${name}_fixed_base_joint" type="fixed">
+       <xacro:insert_block name="origin"/>
+       <child link="${name}_link" />
+       <parent link="${parent_link}"/>
+    </joint>
+
+    <link name="${name}_link">
+
+      <xacro:manta_visual index="1" color="Grey"/>
+      <xacro:manta_visual index="2" color="Grey"/>
+      <xacro:manta_visual index="3" color="Grey"/>
+      <xacro:manta_visual index="4" color="Grey"/>
+      <xacro:manta_visual index="5" color="Grey"/>
+      <xacro:manta_visual index="6" color="Grey"/>
+      <xacro:manta_visual index="7" color="Grey"/>
+      <xacro:manta_visual index="8" color="Grey"/>
+      <xacro:manta_visual index="9" color="Grey"/>
+      <xacro:manta_visual index="10" color="Grey"/>
+      <xacro:manta_visual index="11" color="Grey"/>
+      <xacro:manta_visual index="12" color="Grey"/>
+      <xacro:manta_visual index="13" color="Grey"/>
+      <xacro:manta_visual index="14" color="Grey"/>
+      <xacro:manta_visual index="15" color="Grey"/>
+      <xacro:manta_visual index="16" color="Grey"/>
+      <xacro:manta_visual index="17" color="Grey"/>
+      <xacro:manta_visual index="18" color="Grey"/>
+      <xacro:manta_visual index="19" color="Grey"/>
+      <xacro:manta_visual index="20" color="Grey"/>
+
+      <xacro:manta_collision name="case" color="Grey"/>
+      <xacro:manta_collision name="lens" color="Grey"/>
+
+      <inertial>
+        <!-- Estimated from reference sheet -->
+        <mass value="0.2" />
+        <inertia
+         ixx="1.0" ixy="0.0" ixz="0.0"
+         iyy="1.0" iyz="0.0"
+         izz="1.0" />
+      </inertial>
+    </link>
+
+    <!--Extensions -->
+    <xacro:manta_gazebo name="${name}" rate="10.0"/>
+
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,10 @@
+#Teaches the current location of the platform as a navigation location with a given name
+#The navigation algorithm can navigate the platform to this location afterwards
+
+#The new name of the location
+string location_name
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

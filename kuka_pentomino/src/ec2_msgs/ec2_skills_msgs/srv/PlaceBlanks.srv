@@ -1,0 +1,11 @@
+
+# Initial pose
+euroc_ros_msgs/TransformationXyzAbc magazzinePose
+
+# Motion parameters
+euroc_ros_msgs/MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

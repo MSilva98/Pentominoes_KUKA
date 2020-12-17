@@ -1,0 +1,6 @@
+---
+# The value of the requested parameter
+string parameter_value
+
+# Error message indicating failure - empty string = success
+string error_message

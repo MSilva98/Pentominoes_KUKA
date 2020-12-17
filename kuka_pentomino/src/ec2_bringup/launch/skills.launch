@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Launch file with all available skills -->
+    <node pkg="ec2_skills" type="skill_move_platform" name="skill_move_platform"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_move_arm" name="skill_move_arm"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_move_pt" name="skill_move_pt"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_pick_object" name="skill_pick_object"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_pick_object_shelf" name="skill_pick_object_shelf"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_place_object" name="skill_place_object"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_place_bolt" name="skill_place_bolt"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_place_nut" name="skill_place_nut"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_place_washer" name="skill_place_washer"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_pick_washer" name="skill_pick_washer"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_push_object" name="skill_push_object"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_flip_p5" name="skill_flip_p5"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_pick_blanks" name="skill_pick_blanks"
+          output="screen" respawn="true"/>
+
+    <node pkg="ec2_skills" type="skill_place_blanks" name="skill_place_blanks"
+          output="screen" respawn="true"/>
+
+</launch>

@@ -1,0 +1,12 @@
+#Move the platform to a relative navigation pose 
+
+#The desired relatice pose
+PlatformPose destination_pose
+
+#The motion parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

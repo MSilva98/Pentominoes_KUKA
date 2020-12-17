@@ -1,0 +1,9 @@
+#Sets the tool frame (TCP) relative the to the arm flange
+
+#The desired tool frame transformation
+TransformationXyzAbc transformation_from_flange
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

@@ -1,0 +1,12 @@
+#Moves the platform relative to the current pose
+
+#The desired relative movement
+PlatformPose rel_pose
+
+#The movement parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

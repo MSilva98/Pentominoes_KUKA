@@ -1,0 +1,5 @@
+# The value to set the parameter to
+int32[] parameter_value
+---
+# Error message indicating failure - empty string = success
+string error_message

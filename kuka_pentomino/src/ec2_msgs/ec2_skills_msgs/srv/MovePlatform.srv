@@ -1,0 +1,16 @@
+# Moves the platform to a desired relative position
+# or absolute position
+
+bool absolute_motion
+
+#The desired relative movement
+euroc_ros_msgs/PlatformPose pose
+
+#The movement parameters
+euroc_ros_msgs/MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message
+

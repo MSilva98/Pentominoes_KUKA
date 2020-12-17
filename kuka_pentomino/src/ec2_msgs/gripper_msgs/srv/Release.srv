@@ -1,0 +1,17 @@
+# This service releases a grasped object by moving the jaws to the respective
+# end stop.
+
+# Release by opening the gripper jaws
+uint8 RELEASE_DIRECTION_OPEN=0
+# Release by closing the gripper jaws
+uint8 RELEASE_DIRECTION_CLOSE=1
+
+# The release direction can be either: RELEASE_DIRECTION_OPEN or RELEASE_DIRECTION_CLOSE
+uint8 direction
+
+# The velocity of the movement in [m/s]
+float32 velocity
+
+---
+# An optional error message. Empty = success
+string error_message

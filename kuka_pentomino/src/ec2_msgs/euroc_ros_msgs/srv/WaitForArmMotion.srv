@@ -1,0 +1,6 @@
+#Waits for the current arm motions to finish
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

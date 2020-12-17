@@ -1,0 +1,18 @@
+
+# Pick pose
+euroc_ros_msgs/TransformationXyzAbc pose
+
+euroc_ros_msgs/MotionParameters parameter
+
+bool behind
+
+
+---
+
+float32 gripper_position
+
+# An estimation of the mass
+float32 mass
+
+#Error message indicating failure - empty string = success
+string error_message

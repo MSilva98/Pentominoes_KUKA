@@ -1,0 +1,6 @@
+#Stops the arm gravity compensation mode
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

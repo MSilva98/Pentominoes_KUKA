@@ -1,0 +1,21 @@
+﻿<?xml version="1.0"?>
+<sdf xmlns:xacro="http://www.ros.org/wiki/xacro" version="1.4">
+
+  <xacro:property name="pentomino" value="W"/>
+
+  <xacro:property name="material" value="Gazebo/Purple"/>
+
+  <xacro:property name="x0" value="0"/>
+  <xacro:property name="y0" value="0"/>
+  <xacro:property name="x1" value="-1"/>
+  <xacro:property name="y1" value="0"/>
+  <xacro:property name="x2" value="-1"/>
+  <xacro:property name="y2" value="1"/>
+  <xacro:property name="x3" value="0"/>
+  <xacro:property name="y3" value="-1"/>
+  <xacro:property name="x4" value="1"/>
+  <xacro:property name="y4" value="-1"/>
+
+  <xacro:include filename="../model.xacro"/>
+
+</sdf>

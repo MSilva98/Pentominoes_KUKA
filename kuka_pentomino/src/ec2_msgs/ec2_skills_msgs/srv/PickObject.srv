@@ -1,0 +1,22 @@
+
+# Pick pose
+euroc_ros_msgs/TransformationXyzAbc pose
+
+euroc_ros_msgs/MotionParameters parameter
+
+# Initial position of the gripper before picking
+# When the value is zero the initial position is ignored.
+float32 gripper_position
+
+# The ammount of force that is used to grasp the object
+float32 force
+
+---
+
+float32 gripper_position
+
+# An estimation of the mass
+float32 mass
+
+#Error message indicating failure - empty string = success
+string error_message

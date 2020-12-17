@@ -1,0 +1,20 @@
+# This service grasps an object by moving the jaws towards the respective
+# end stop and stopping when an object is grasped.
+
+# Grasp by moving the gripper jaws appart
+uint8 GRASP_DIRECTION_OPEN=0
+# Grasp by moving the gripper jaws towards each other
+uint8 GRASP_DIRECTION_CLOSE=1
+
+# The grasp direction can be either: GRASP_DIRECTION_OPEN or GRASP_DIRECTION_CLOSE
+uint8 direction
+
+# The velocity of the movement in [m/s]
+float32 velocity
+
+# The desired grasp force in [N]
+float32 force
+
+---
+# An optional error message. Empty = success
+string error_message

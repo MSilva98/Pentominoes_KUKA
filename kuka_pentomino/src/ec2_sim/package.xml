@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<package>
+    <name>ec2_sim</name>
+    <version>0.0.0</version>
+    <description>Simulation wrappers</description>
+
+    <maintainer email="efp@ua.pt">Eurico Pedrosa</maintainer>
+    <license>BSD</license>
+
+    <author email="peter.lehner@dlr.de">Peter Lehner</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <run_depend>rospy</run_depend>
+    <run_depend>euroc_ros_msgs</run_depend>
+    <run_depend>python_orocos_kdl</run_depend>
+
+  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>angles</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>trac_ik_lib</build_depend>
+
+  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>angles</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>camera_info_manager</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>trac_ik_lib</run_depend>
+
+    <export>
+    </export>
+</package>

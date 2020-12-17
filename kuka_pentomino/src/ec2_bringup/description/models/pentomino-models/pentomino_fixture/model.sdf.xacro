@@ -1,0 +1,47 @@
+﻿<?xml version="1.0"?>
+<sdf xmlns:xacro="http://www.ros.org/wiki/xacro" version="1.4">
+
+    <xacro:property name="pi" value="3.14159265358979323844"/>
+
+    <xacro:property name="height" value="0.016"/>
+    <xacro:property name="width" value="0.02"/>
+    <xacro:property name="length" value="0.15"/>
+
+    <xacro:macro name="bar" params="suffix pose">
+      <collision name="bar_${suffix}">
+        <geometry>
+          <box><size>${width} ${length+width} ${height}</size></box>
+        </geometry>
+        <pose>${pose}</pose>
+      </collision>
+      <visual name="bar_${suffix}">
+        <geometry>
+          <box><size>${width} ${length+width} ${height}</size></box>
+        </geometry>
+        <pose>${pose}</pose>
+        <material><script><name>Gazebo/Black</name></script></material>
+      </visual>
+    </xacro:macro>
+
+    <model name="pentomino_fixture">
+
+      <static>true</static>
+
+      <link name="pentomino_fixture">
+        <xacro:bar suffix="H" pose="${-width/2} ${length/2-width/2} ${height/2} 0 0 0"/>
+        <xacro:bar suffix="V" pose="${length/2-width/2} ${-width/2} ${height/2} 0 0 ${pi/2}"/>
+        <visual name="plane">
+          <pose>${length/2} ${length/2} 0.001 0 0 0</pose>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>${length} ${length}</size>
+            </plane>
+          </geometry>
+          <material><script><name>Gazebo/Yellow</name></script></material>
+        </visual>
+      </link>
+
+    </model>
+
+</sdf>

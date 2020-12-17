@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="chain_start" default="iiwa_base" />
+  <arg name="chain_end" default="schunk_adapter_link" />
+  <arg name="timeout" default="0.050" />
+  <arg name="showcase" default="false"/>
+  <arg name="serviceName" default="/miiwa/get_inverse_kinematic2" />
+
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ec2_bringup)/description/miiwa/miiwa.urdf.xacro' showcase:=$(arg showcase)" />
+
+  <node name="inverseKinematicService" pkg="ec2_sim" type="inverse_kinematic_service" output="screen">
+    <param name="chain_start" value="$(arg chain_start)"/>
+    <param name="chain_end" value="$(arg chain_end)"/>
+    <param name="timeout" value="$(arg timeout)"/>
+    <param name="urdf_param" value="/robot_description"/>
+    <param name="serviceName1" value="$(arg serviceName)"/>
+  </node>
+
+
+</launch>

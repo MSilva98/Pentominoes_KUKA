@@ -1,0 +1,12 @@
+# Application priority
+# A higher priority will reserve the service until it is realeased.
+# To release the resource use a negative value of its priority.
+int32 priority
+# The desired value for pan in radians
+float32 pan
+# The desired value for tilt in radians
+float32 tilt
+---
+#Error message indicating failure - empty string = success
+string error_message
+

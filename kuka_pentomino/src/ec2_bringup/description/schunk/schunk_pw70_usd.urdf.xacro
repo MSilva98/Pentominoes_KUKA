@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find ec2_bringup)/description/schunk/schunk_pw70.gazebo.xacro" />
+  <!-- Import Transmissions -->
+  <xacro:include filename="$(find ec2_bringup)/description/schunk/schunk_pw70.transmission.xacro" />
+
+  <xacro:property name="pi" value="3.1415926535897931" />
+  <xacro:property name="tilt_min_position" value="${-119.0 * pi / 180.0}"/>
+  <xacro:property name="tilt_max_position" value="${119.0 * pi / 180.0}"/>
+  <xacro:property name="tilt_max_torque" value="11.9"/>
+  <xacro:property name="tilt_max_velocity" value="${239.0 * pi / 180.0}"/>
+
+  <xacro:property name="pan_min_position" value="${-1.0 * pi}"/>
+  <xacro:property name="pan_max_position" value="${pi}"/>
+  <xacro:property name="pan_max_torque" value="1.9"/>
+  <xacro:property name="pan_max_velocity" value="${359.0 * pi / 180.0}"/>
+
+  <xacro:macro name="schunk_pw70_visual" params="name material *origin">
+      <visual>
+        <xacro:insert_block name="origin"/>
+        <geometry>
+            <mesh filename="package://ec2_bringup/meshes/schunk/visual/${name}.stl" />
+        </geometry>
+        <material name="${material}"/>
+      </visual>
+  </xacro:macro>
+
+  <xacro:macro name="schunk_pw70_visual_tilt" params="name material">
+      <xacro:schunk_pw70_visual name="schunk_pw70_link_tilt/${name}" material="${material}">
+        <origin xyz="0 0 0.0" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_visual>
+  </xacro:macro>
+
+  <xacro:macro name="schunk_pw70_collision" params="name material *origin">
+      <collision>
+        <xacro:insert_block name="origin"/>
+        <geometry>
+            <mesh filename="package://ec2_bringup/meshes/schunk/collision/${name}.stl" />
+        </geometry>
+        <material name="${material}"/>
+      </collision>
+  </xacro:macro>
+
+  <xacro:macro name="schunk_pw70_collision_tilt" params="name material">
+      <xacro:schunk_pw70_collision name="schunk_pw70_link_tilt/${name}" material="${material}">
+         <origin xyz="0 0 0.0" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_collision>
+  </xacro:macro>
+
+  <xacro:macro name="schunk_pw70_usd" params="parent_link name hardware_interface *origin">
+    <joint name="${name}_fixed_base_joint" type="fixed">
+       <xacro:insert_block name="origin"/>
+       <child link="${name}_link_pan" />
+       <parent link="${parent_link}"/>
+    </joint>
+
+    <link name="${name}_link_pan">
+      <xacro:schunk_pw70_visual
+       name="schunk_pw70_link_pan/pan_hull"
+       material="Light Grey">
+         <origin xyz="0. 0 ${0.093}" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_visual>
+
+      <xacro:schunk_pw70_collision
+       name="schunk_pw70_link_pan/pan_hull"
+       material="Light Grey">
+         <origin xyz="0. 0 ${0.093}" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_collision>
+
+      <inertial>
+        <!-- Estimated by volume approx -->
+        <mass value="0.187" />
+        <inertia
+          ixx="1.0" ixy="0.0" ixz="0.0"
+          iyy="1.0" iyz="0.0"
+          izz="1.0" />
+        </inertial>
+    </link>
+
+    <joint name="${name}_joint_pan" type="revolute">
+       <origin xyz="0 0 0.057" rpy="0 0 0" />
+       <axis xyz="0 0 1"/>
+       <limit lower="${pan_min_position}" upper="${pan_max_position}" effort="${pan_max_torque}" velocity="${pan_max_velocity}"/>
+       <parent link="${name}_link_pan"/>
+       <child link="${name}_link_core" />
+    </joint>
+
+    <link name="${name}_link_core">
+
+      <xacro:schunk_pw70_visual
+       name="schunk_pw70_link_core/core_hull"
+       material="Light Grey">
+        <origin xyz="0 0 0.037" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_visual>
+
+      <xacro:schunk_pw70_collision
+       name="schunk_pw70_link_core/core_hull"
+       material="Light Grey">
+        <origin xyz="0 0 0.037" rpy="0 ${pi} 0" />
+      </xacro:schunk_pw70_collision>
+
+      <inertial>
+        <!-- Estimated by volume approx -->
+        <mass value="1.126" />
+        <inertia
+          ixx="1.0" ixy="0.0" ixz="0.0"
+          iyy="1.0" iyz="0.0"
+          izz="1.0" />
+        </inertial>
+    </link>
+
+    <joint name="${name}_joint_tilt" type="revolute">
+       <origin xyz="0 0 0.037" rpy="0 0 0" />
+       <axis xyz="-1 0 0"/>
+       <limit lower="${tilt_min_position}" upper="${tilt_max_position}" effort="${tilt_max_torque}" velocity="${tilt_max_velocity}"/>
+       <parent link="${name}_link_core"/>
+       <child link="${name}_link_tilt" />
+    </joint>
+
+    <link name="${name}_link_tilt">
+      <xacro:schunk_pw70_visual_tilt name="tilt_hull" material="Light Grey"/>
+      <xacro:schunk_pw70_visual_tilt name="connector" material="Light Grey"/>
+      <xacro:schunk_pw70_visual_tilt name="cable_1" material="Light Grey"/>
+      <xacro:schunk_pw70_visual_tilt name="cable_2" material="Light Grey"/>
+
+      <xacro:schunk_pw70_collision_tilt name="tilt_hull_1" material="Light Grey"/>
+      <xacro:schunk_pw70_collision_tilt name="tilt_hull_2" material="Light Grey"/>
+      <xacro:schunk_pw70_collision_tilt name="connector" material="Light Grey"/>
+      <xacro:schunk_pw70_collision_tilt name="cable_1" material="Light Grey"/>
+      <xacro:schunk_pw70_collision_tilt name="cable_2" material="Light Grey"/>
+
+      <inertial>
+        <!-- Estimated by volume approx -->
+        <mass value="0.487" />
+        <inertia
+         ixx="1.0" ixy="0.0" ixz="0.0"
+         iyy="1.0" iyz="0.0"
+         izz="1.0" />
+      </inertial>
+    </link>
+
+    <joint name="${name}_mount_joint" type="fixed">
+       <origin xyz="0.0 0.0 0.07" rpy="0 0 0"/>
+       <parent link="${name}_link_tilt"/>
+       <child link="${name}_link_mount" />
+    </joint>
+
+    <link name="${name}_link_mount"/>
+
+    <!--Extensions -->
+    <xacro:schunk_pw70_gazebo name="${name}" />
+    <xacro:schunk_pw70_transmission name="${name}" hardware_interface="${hardware_interface}"/>
+
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<launch>
+
+<env name="GAZEBO_MODEL_PATH" value="$(find ec2_bringup)/description/models:$(find ec2_bringup)/description/models/pentomino-models" />
+
+  <!-- these arguments you can pass this launch file-->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="true"/>
+  <arg name="debug" default="false"/>
+  <arg name="hardware_interface" default="JointPositionInterface"/>
+  <arg name="showcase" default="false"/>
+  <arg name="serviceName" default="/miiwa/get_inverse_kinematic" />
+  <arg name="world_name"  default="$(find ec2_bringup)/description/worlds/euroc-freestyle-vfxunp-1.world"/>
+
+  <!-- include robot description -->$(find ec2_bringup)/
+
+  <include file="$(find ec2_bringup)/launch/inverseKinematicService.launch" >
+  	<arg name="showcase" value="$(arg showcase)"/>
+  	<arg name="serviceName" value="$(arg serviceName)"/>
+  </include>
+
+  <include file="$(find ec2_bringup)/launch/miiwa.launch" >
+  	<arg name="hardware_interface" value="$(arg hardware_interface)"/>
+  	<arg name="showcase" value="$(arg showcase)"/>
+  </include>
+
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find ec2_bringup)/config/miiwa_control.yaml" command="load" ns="dlr_miiwa_sim"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+      output="screen" ns="dlr_miiwa_sim" args="joint_state_controller
+                                          miiwa_joint_trajectory_position_controller
+                                          lbr_iiwa_joint_trajectory_position_controller
+                                          schunkg_pw70_joint_trajectory_position_controller
+                                          schunkg_wsg50_joint_trajectory_position_controller" />
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+  
+  <arg name="offsetX" default="0.0"/>
+  <arg name="offsetY" default="-1.0" if="$(arg showcase)"/>
+  <arg name="offsetY" default="0.0" unless="$(arg showcase)"/>
+  <param name="offsetX" value="$(arg offsetX)" type="double" /> 
+  <param name="offsetY" value="$(arg offsetY)" type="double" />
+  
+  
+  <!-- spawn the model in the simulation -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+	    args="-urdf -model dlr_miiwa -param robot_description -x $(arg offsetX) -y $(arg offsetY)"/>
+
+ <node name="ec2_sim_wrapper" pkg="ec2_sim" type="simulation_wrapper.py" required="true" output="screen"/> 
+ 
+</launch>

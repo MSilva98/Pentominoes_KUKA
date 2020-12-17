@@ -1,0 +1,9 @@
+#Returns all defined location names
+
+---
+
+#The location names
+string[] location_names
+
+#Error message indicating failure - empty string = success
+string error_message

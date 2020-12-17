@@ -1,0 +1,12 @@
+#Returns the relative offset to a defined location
+
+#The location name
+string location_name
+
+---
+
+#The offset to the location
+PlatformPose pose
+
+#Error message indicating failure - empty string = success
+string error_message

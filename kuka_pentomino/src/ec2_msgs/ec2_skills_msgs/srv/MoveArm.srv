@@ -1,0 +1,19 @@
+
+# The desired joint positions
+euroc_ros_msgs/JointPosition position
+
+# The desired pose for the tcp.
+# This will only be used when the size of the position array is 0.
+euroc_ros_msgs/TransformationXyzAbc pose
+
+#The movement parameters
+euroc_ros_msgs/MotionParameters parameter
+
+#The movement should be relative or not
+bool relative
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message
+

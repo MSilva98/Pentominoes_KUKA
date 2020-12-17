@@ -1,0 +1,8 @@
+# Returns the current force acting upon the gripper jaws
+
+---
+# The jaw force in [N]
+float32 force
+
+# An optional error message. Empty = success
+string error_message

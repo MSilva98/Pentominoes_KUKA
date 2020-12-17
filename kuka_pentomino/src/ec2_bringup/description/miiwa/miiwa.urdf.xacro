@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+xmlns:xacro="http://www.ros.org/wiki/xacro"
+name="dlr_miiwa_sim" >
+
+  <xacro:property name="pi" value="3.1415926535897931" />
+  <xacro:property name="showcase" value="$(arg showcase)"/>
+
+  <xacro:property name="iiwa_flange_height" value="0.045"/>
+  <xacro:property name="iiwa_wsg50_connector_height" value="0.018"/>
+  <xacro:property name="schunk_wsg50_offset" value="${iiwa_flange_height + iiwa_wsg50_connector_height}"/>
+  <xacro:property name="schunk_wsg50_rotation" value="${135.0 * pi / 180.0}"/>
+  <xacro:property name="schunk_pw70_offset" value="0.0"/>
+
+  <xacro:property name="interface" value="PositionJointInterface"/>
+
+  <xacro:property name="pan_tilt_mast_offset" value="0.03"/>
+
+  <xacro:property name="mako_3d_rotation" value="${0.5 * pi}"/>
+  <xacro:property name="mako_3d_hand_x_offset" value="${0.018}"/>
+  <xacro:property name="mako_3d_hand_y_offset" value="${0.025 + 0.0145 + 0.027}"/>
+  <xacro:property name="mako_3d_hand_z_offset" value="${0.017}"/>
+  <xacro:property name="mako_3d_hand_relative_offset" value="${-0.036}"/>
+  <xacro:property name="manta_rotation" value="${0.5 * pi} ${pi} ${pi}"/>
+  <xacro:property name="manta_mast_x_offset" value="${-0.025}"/>
+  <xacro:property name="manta_mast_y_offset" value="${0.025}"/>
+  <xacro:property name="manta_mast_z_offset" value="${0.0455}"/>
+  <xacro:property name="manta_mast_relative_offset" value="${0.05}"/>
+
+  <!-- Import Rviz colors -->
+  <xacro:include filename="$(find ec2_bringup)/description/materials.urdf.xacro" />
+
+  <!-- The following included files set up definitions of parts of the robot body -->
+  <!-- Import Gazebo plugins -->
+  <xacro:include filename="$(find ec2_bringup)/description/miiwa/gazebo.urdf.xacro"/>
+
+  <!-- Import urdf macros -->
+  <!-- miiwa base -->
+  <xacro:include filename="$(find ec2_bringup)/description/miiwa/miiwa_base.urdf.xacro" />
+  <!-- iiwa -->
+  <xacro:include filename="$(find ec2_bringup)/description/lbr_iiwa/lbr_iiwa.xacro"/>
+  <!-- schunk_adapter -->
+  <xacro:include filename="$(find ec2_bringup)/description/schunk/schunk_adapter.urdf.xacro"/>
+  <!-- schunk_wsg50 -->
+  <xacro:include filename="$(find ec2_bringup)/description/schunk/schunk_wsg50.urdf.xacro"/>
+  <!-- schunk_pw70 -->
+  <xacro:include filename="$(find ec2_bringup)/description/schunk/schunk_pw70_usd.urdf.xacro"/>
+  <!-- gripper camera connector -->
+  <xacro:include filename="$(find ec2_bringup)/description/miiwa/gripper_camera_connector.urdf.xacro"/>
+  <!-- pan-tilt_mast -->
+  <xacro:include filename="$(find ec2_bringup)/description/miiwa/pan_tilt_mast.urdf.xacro"/>
+  <!-- pan-tilt_connector -->
+  <xacro:include filename="$(find ec2_bringup)/description/miiwa/pan_tilt_connector.urdf.xacro"/>
+  <!-- cameras -->
+  <xacro:include filename="$(find ec2_bringup)/description/cameras/mako_3d.urdf.xacro" />
+  <xacro:include filename="$(find ec2_bringup)/description/cameras/manta.urdf.xacro" />
+
+  <!-- Construct the dlr_miiwa from parts -->
+  <link name="world"/>
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
+
+  <!-- Base frame to anchor the robot in the world -->
+  <link name="base_link"/>
+  <!-- miiwa mobile base -->
+  <xacro:miiwa_base
+    name="miiwa"
+    parent_link="base_link"
+    hardware_interface="hardware_interface/${interface}"
+  />
+  <!-- lbr iiwa manipulator -->
+  <xacro:lbr_iiwa
+    name="lbr_iiwa"
+    parent="iiwa_base"
+    hardware_interface="hardware_interface/${interface}"
+   >
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+  </xacro:lbr_iiwa>
+
+  <!-- schunk gripper adapter -->
+  <xacro:schunk_adapter
+    name="schunk_adapter"
+    parent_link="lbr_iiwa_link_7"
+  >
+    <origin xyz="0 0 ${iiwa_flange_height}" rpy="0.0 0.0 0.0"/>
+  </xacro:schunk_adapter>
+
+  <!-- schunk_wsg50 gripper -->
+  <xacro:schunk_wsg50
+    name="schunk_wsg50"
+    parent_link="lbr_iiwa_link_7"
+    hardware_interface="hardware_interface/${interface}"
+  >
+    <origin xyz="0 0 ${schunk_wsg50_offset}" rpy="0.0 0.0 ${schunk_wsg50_rotation}"/>
+  </xacro:schunk_wsg50>
+
+  <!-- gripper camera connector -->
+  <xacro:gripper_camera_connector
+    name="gripper_camera_connector"
+    parent_link="schunk_wsg50_link_base"
+  >
+    <origin xyz="0 0.025 0" rpy="0.0 0.0 0.0"/>
+  </xacro:gripper_camera_connector>
+
+  <!-- pan tilt mast -->
+  <xacro:pan_tilt_mast
+    name="pan_tilt_mast"
+    parent_link="miiwa_link_mast_mount"
+  >
+    <origin xyz="${pan_tilt_mast_offset} 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </xacro:pan_tilt_mast>
+
+  <!-- schunk_pw70 -->
+  <xacro:schunk_pw70_usd
+    name="schunk_pw70"
+    parent_link="pan_tilt_mast_link_mount"
+    hardware_interface="hardware_interface/${interface}"
+  >
+    <origin xyz="0 0 ${schunk_pw70_offset}" rpy="0.0 0.0 ${3.0 / 2.0 * pi}"/>
+  </xacro:schunk_pw70_usd>
+
+  <!-- pan tilt connector -->
+  <xacro:pan_tilt_connector
+    name="pan_tilt_connector"
+    parent_link="schunk_pw70_link_mount"
+  >
+    <origin xyz="0 0 0.001" rpy="0.0 0.0 0.0"/>
+  </xacro:pan_tilt_connector>
+
+  <!-- cameras -->
+  <xacro:mako_3d
+    name="cameras_tcp_rect/left"
+    parent_link="schunk_wsg50_link_base"
+  >
+    <origin
+      xyz="${mako_3d_hand_x_offset} ${mako_3d_hand_y_offset} ${mako_3d_hand_z_offset}"
+      rpy="0.0 0.0 0.0"
+    />
+  </xacro:mako_3d>
+
+  <xacro:mako_3d
+    name="cameras_tcp_rect/right"
+    parent_link="cameras_tcp_rect/left_link"
+  >
+    <origin xyz="${mako_3d_hand_relative_offset} 0 0" rpy="0.0 0.0 0.0"/>
+  </xacro:mako_3d>
+
+  <xacro:manta
+    name="cameras_pan_tilt/left"
+    parent_link="schunk_pw70_link_mount"
+  >
+    <origin
+      xyz="${manta_mast_x_offset} ${manta_mast_y_offset} ${manta_mast_z_offset}"
+      rpy="${manta_rotation}"
+    />
+  </xacro:manta>
+
+  <xacro:manta
+    name="cameras_pan_tilt/right"
+    parent_link="cameras_pan_tilt/left_link"
+  >
+    <origin xyz="${manta_mast_relative_offset} 0 0" rpy="0.0 0.0 0.0"/>
+  </xacro:manta>
+
+    <!-- additions for gazebo -->
+  <xacro:mako_depth_camera_gazebo
+    name="/sgm_tcp"
+    rate="10.0"
+    parent_link="cameras_tcp_rect/left_link"
+  />
+
+  <xacro:manta_depth_camera_gazebo
+    name="/sgm_pan_tilt"
+    rate="10.0"
+    parent_link="cameras_pan_tilt/left_link"
+  />
+
+</robot>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+    <name>ec2_bringup</name>
+    <version>1.0.0</version>
+    <description>Placeholder for all launch, configuration and description files.</description>
+
+    <maintainer email="efp@ua.pt">Eurico Pedrosa</maintainer>
+    <license>DLR</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <run_depend>ec2_sim</run_depend>
+
+    <export>
+    </export>
+</package>

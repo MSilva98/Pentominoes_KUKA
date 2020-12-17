@@ -1,0 +1,9 @@
+#Returns the current navigation pose
+
+---
+
+#The current navigation pose
+PlatformPose pose
+
+#Error message indicating failure - empty string = success
+string error_message

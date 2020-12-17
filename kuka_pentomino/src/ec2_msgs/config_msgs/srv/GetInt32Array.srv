@@ -1,0 +1,6 @@
+---
+# The list of values of the requested parameter
+int32[] parameter_value
+
+# Error message indicating failure - empty string = success
+string error_message

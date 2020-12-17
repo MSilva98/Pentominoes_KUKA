@@ -1,0 +1,9 @@
+# This service returns the current position of the gripper jaws. The position
+# corresponds to the free space between the two jaws.
+
+---
+# The jaw postion in [m]
+float32 position
+
+# An optional error message. Empty = success
+string error_message

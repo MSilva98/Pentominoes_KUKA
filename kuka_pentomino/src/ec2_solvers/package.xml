@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>ec2_solvers</name>
+  <version>0.0.0</version>
+  <description>Solvers are the AI that solve the tasks</description>
+
+  <maintainer email="efp@ua.pt">Eurico Pedrosa</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>ec2_interface</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>eigen_conversions</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>ec2_skills_interface</build_depend>
+  <build_depend>ima_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>ec2_interface</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>eigen_conversions</run_depend>
+  <run_depend>visualization_msgs</run_depend>
+  <run_depend>ec2_skills_interface</run_depend>
+
+  <export>
+  </export>
+</package>

@@ -1,0 +1,63 @@
+﻿<?xml version="1.0"?>
+<sdf xmlns:xacro="http://www.ros.org/wiki/xacro" version="1.4">
+
+  <model name="pentomino_${pentomino}">
+
+    <xacro:property name="ccgap" value="0.001"/>
+    <xacro:property name="cmass" value="0.2"/>
+    <xacro:property name="cwidth" value="0.033"/>
+
+    <xacro:property name="iref" value="${(1/6)*cmass*cwidth*cwidth}"/>
+
+    <xacro:macro name="cube" params="x y">
+      <visual name="cube_${x}_${y}">
+        <pose>${x*(cwidth+ccgap)} ${y*(cwidth+ccgap)} ${cwidth/2} 0 0 0</pose>
+        <geometry>
+          <box><size>${cwidth} ${cwidth} ${cwidth}</size></box>
+        </geometry>
+        <material><script><name>${material}</name></script></material>
+      </visual>
+      <collision name="cube_${x}_${y}">
+        <pose>${x*(cwidth+ccgap)} ${y*(cwidth+ccgap)} ${cwidth/2} 0 0 0</pose>
+        <geometry>
+          <box><size>${cwidth} ${cwidth} ${cwidth}</size></box>
+        </geometry>
+        <surface>
+           <bounce>
+             <restitution_coefficient>0.0</restitution_coefficient> 
+           </bounce>
+           <friction>
+                 <ode>
+                    <mu>1.0</mu>
+                    <mu2>1.0</mu2>
+                 </ode>
+           </friction>
+        </surface>
+      </collision>
+    </xacro:macro>
+
+    <link name="pentomino_${pentomino}">
+      <velocity_decay>
+           <linear>0.01</linear>
+           <angular>1.0</angular>
+      </velocity_decay>
+      <xacro:cube x="${x0}" y="${y0}"/>
+      <xacro:cube x="${x1}" y="${y1}"/>
+      <xacro:cube x="${x2}" y="${y2}"/>
+      <xacro:cube x="${x3}" y="${y3}"/>
+      <xacro:cube x="${x4}" y="${y4}"/>
+
+      <inertial name="cube_0_0">
+        <pose>${(cwidth+ccgap)} ${(cwidth+ccgap)} ${cwidth/2} 0 0 0</pose>
+        <mass>${cmass}</mass>
+        <inertia>
+          <ixx>${600*iref}</ixx> <!-- TODO -->
+          <iyy>${600*iref}</iyy>
+          <izz>${600*iref}</izz>
+          <ixy>0</ixy> <ixz>0</ixz> <iyz>0</iyz>
+        </inertia>
+      </inertial>
+    </link>
+
+  </model>
+</sdf>

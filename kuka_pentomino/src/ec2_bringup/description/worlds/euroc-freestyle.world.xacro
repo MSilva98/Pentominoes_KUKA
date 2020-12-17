@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<sdf xmlns:xacro="http://www.ros.org/wiki/xacro" version="1.4">
+
+  <xacro:property name="pi" value="3.14159265358979323844"/>
+
+  <!-- only 4 yaws are allowed, given by tQ -->
+  <!-- Only 0 and 3 (rotated -pi/2) accepted by now -->
+
+  <!-- table pose in world frame -->
+  <xacro:property name="tX" value="0"/>
+  <xacro:property name="tY" value="0.8"/>
+  <xacro:property name="tQ" value="3"/>
+  <xacro:property name="tYaw" value="${tQ*pi/2}"/>
+
+  <!-- pentomino-fixture name and pose in table frame -->
+  <xacro:property name="name" value="board6x5_8"/>
+  <xacro:property name="fX" value="${-0.04}"/>
+  <xacro:property name="fY" value="${-0.01}"/>
+  <xacro:property name="fZ" value="${0.85}"/>
+
+  <xacro:property name="cwidth" value="0.033"/>
+
+  <!-- grid pose in pentomino-fixture frame -->
+  <xacro:property name="gX" value="${0.05}"/>
+  <xacro:property name="gY" value="${0.60}"/>
+
+  <!-- pentomino pose in grid frame -->
+  <xacro:property name="pX" value="${x*cwidth}"/>
+  <xacro:property name="pY" value="${y*cwidth}"/>
+  <xacro:property name="pYaw" value="${((rot+90*ori)*pi/180)}"/>
+
+  <xacro:macro name="pentomino" params="type x y rot ori flip">
+    <xacro:include>
+      <uri>model://pentomino_${type}</uri>
+      <xacro:unless value="${tQ-0}"> <!-- if tQ == 0 -->
+      <pose>${tX+fX+gX+pX} ${tY+fY+gY+pY} ${fZ+flip*cwidth} 0 ${flip*pi} ${tYaw+pYaw}</pose>
+      </xacro:unless>
+      <xacro:unless value="${tQ-3}"> <!-- if tQ == 3 -->
+      <pose>${tX+(fY+gY+pY)} ${tY-(fX+gX+pX)} ${fZ+flip*cwidth} 0 ${flip*pi} ${tYaw+pYaw}</pose>
+      </xacro:unless>
+    </xacro:include>
+  </xacro:macro>
+
+  <world name="pentomino_${name}">
+    <xacro:include>
+      <uri>model://ground_plane</uri>
+    </xacro:include>
+
+     <xacro:include>
+      <uri>model://sun</uri>
+    </xacro:include>
+
+    <xacro:include>
+      <uri>model://DLR_workbench</uri>
+      <name>workbench_fixture</name>
+      <pose>${tX} ${tY} 00 0 0 ${tYaw}</pose>
+      <static>true</static>
+    </xacro:include>
+
+    <xacro:include>
+      <uri>model://pentomino_fixture</uri>
+      <xacro:unless value="${tQ-0}">
+      <pose>${tX+fX} ${tY+fY} ${fZ} 0 0 ${tYaw}</pose>
+      </xacro:unless>
+      <xacro:unless value="${tQ-3}">
+      <pose>${tX+fY} ${tY-fX} ${fZ} 0 0 ${tYaw}</pose>
+      </xacro:unless>
+    </xacro:include>
+
+    <xacro:pentomino type="L" x="2" y="-8" rot="-23" ori="0" flip="1"/>
+    <xacro:pentomino type="I" x="5" y="-4" rot="0" ori="0" flip="1"/>
+    <xacro:pentomino type="W" x="5" y="-9" rot="0" ori="0" flip="1"/>
+    <xacro:pentomino type="T" x="-3" y="-10" rot="0" ori="0" flip="0"/>
+    <xacro:pentomino type="Y" x="-2" y="-4" rot="0" ori="0" flip="1"/>
+    <xacro:pentomino type="Z" x="2" y="-4" rot="0" ori="0" flip="1"/>
+
+<!--
+-->
+  </world>
+</sdf>

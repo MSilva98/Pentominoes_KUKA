@@ -1,0 +1,15 @@
+#Move the TCP (tool center point) relative to the current pose in impedance mode
+
+#The relative transformation
+TransformationXyzAbc transformation
+
+#The desired stiffness in the 6 DoF of the TCP in [N] or [Nm]
+SixDoF stiffness
+
+#The motion parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

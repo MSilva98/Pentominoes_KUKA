@@ -1,0 +1,20 @@
+
+string initial_position
+
+# level of the first feeder
+int32 level0
+int32 rate0
+bool  available0
+
+# level of the second feeder
+int32   level1
+int32   rate1
+bool    available1
+string  pilebig1pos
+string  pilebig2pos
+string  pilesmall1pos
+string  pilesmall2pos
+---
+
+euroc_ros_msgs/Action[] plan
+

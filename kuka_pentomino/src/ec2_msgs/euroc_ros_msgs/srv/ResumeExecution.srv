@@ -1,0 +1,6 @@
+#Resumes execution after resolving an emergency stop
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

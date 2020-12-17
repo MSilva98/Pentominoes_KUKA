@@ -1,0 +1,6 @@
+#Triggers the navigation system to start the global localization in the map
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<robot name="schunk_pw70" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="schunk_pw70_gazebo" params="name">
+
+    <!-- Link0 -->
+    <gazebo reference="${name}_link_tilt">
+      <selfCollide>true</selfCollide>
+      <material>Gazebo/Grey</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="${name}_link_core">
+      <selfCollide>true</selfCollide>
+      <material>Gazebo/Grey</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="${name}_link_pan">
+      <selfCollide>true</selfCollide>
+      <material>Gazebo/Grey</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

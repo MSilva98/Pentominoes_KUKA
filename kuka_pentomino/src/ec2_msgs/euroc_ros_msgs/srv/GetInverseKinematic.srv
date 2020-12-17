@@ -1,0 +1,15 @@
+#Returns one inverse kinematic solution for a given TCP pose
+
+#The desired TCP pose
+TransformationXyzAbc tcp_pose
+
+#A desired joint position to which the closest available solution will be computed
+JointPosition corresponding_joint_position
+
+---
+
+#The solution joint position
+JointPosition joint_position
+
+#Error message indicating failure - empty string = success
+string error_message

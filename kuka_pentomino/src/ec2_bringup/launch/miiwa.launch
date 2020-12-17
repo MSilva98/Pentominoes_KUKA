@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- these arguments you can pass this launch file-->
+  <arg name="hardware_interface" default="JointPositionInterface"/>
+  <arg name="showcase" default="false"/>
+
+ <!-- Load the URDF with the given hardware interface into the ROS Parameter Server -->
+  <param name="robot_description"
+      command="$(find xacro)/xacro.py '$(find ec2_bringup)/description/miiwa/miiwa.urdf.xacro' prefix:=$(arg hardware_interface) showcase:=$(arg showcase)" />
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+	respawn="false" output="screen">
+    <remap from="/joint_states" to="/dlr_miiwa_sim/joint_states" />
+  </node>
+
+</launch>
+

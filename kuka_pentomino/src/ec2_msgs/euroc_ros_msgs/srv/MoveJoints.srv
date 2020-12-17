@@ -1,0 +1,12 @@
+#Move the joints to a given position
+
+#The requested position
+JointPosition desired_joint_positions
+
+#The motion parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

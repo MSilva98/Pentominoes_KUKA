@@ -1,0 +1,12 @@
+#Move to an absolute navigation pose with the platform
+
+#The desired pose
+PlatformPose destination_pose
+
+#The motion parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

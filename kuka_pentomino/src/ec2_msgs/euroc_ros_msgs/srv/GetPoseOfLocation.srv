@@ -1,0 +1,12 @@
+#Returns the pose of the location in the map
+
+#The location name
+string location_name
+
+---
+
+#The pose of the location
+PlatformPose pose
+
+#Error message indicating failure - empty string = success
+string error_message

@@ -1,0 +1,157 @@
+<?xml version='1.0'?>
+<sdf version="1.4" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <model name="DLR_workbench">
+    <pose>0 0 0 0 0 0</pose>
+    <static>false</static>
+
+  <xacro:property name="mesh_scale" value="10"/>
+
+  <xacro:property name="mesh_bbox_x" value="7"/>
+  <xacro:property name="mesh_bbox_y" value="15"/>
+  <xacro:property name="mesh_bbox_z" value="8.5"/>
+  <xacro:property name="mesh_cmass_x" value="0"/>
+  <xacro:property name="mesh_cmass_y" value="0"/>
+  <xacro:property name="mesh_cmass_z" value="3.954"/>
+
+  <xacro:property name="mesh_ixx" value="1018.629089"/>
+  <xacro:property name="mesh_iyy" value="233.564636"/>
+  <xacro:property name="mesh_izz" value="1223.154053"/>
+  <xacro:property name="mesh_volume" value="53.010201"/>
+
+  <xacro:property name="mass" value="50.0"/>
+
+    <link name="main_body">
+	  <pose>0 0 0 0 0 0</pose>
+
+<!-- workbench top -->
+		
+      <collision name="top">
+        <geometry>
+          <box>
+            <size>0.70 1.50 0.05</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.825 0 0 0</pose>
+      </collision>
+
+      <visual name="top">
+        <geometry>
+          <box>
+            <size>0.70 1.50 0.05</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.825 0 0 0</pose>
+        <material>
+            <script><name>Gazebo/Wood</name></script>
+<!--
+          <ambient>.25 .4 .694 1</ambient>
+          <diffuse>.204 .505 .827 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+-->
+        </material>
+      </visual>
+<!-- left rear leg -->
+
+      <collision name="left_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>-0.275 -0.6225 0.40 0 0 0</pose>
+      </collision>
+
+      <visual name="left_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>-0.275 -0.6225 0.40 0 0 0</pose>
+        <material><script><name>Gazebo/Grey</name></script></material>
+      </visual>
+
+<!-- right rear leg -->
+
+      <collision name="left_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>-0.275 0.6225 0.40 0 0 0</pose>
+      </collision>
+
+      <visual name="right_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>-0.275 0.6225 0.40 0 0 0</pose>
+        <material><script><name>Gazebo/Grey</name></script></material>
+      </visual>
+
+<!-- left front leg -->
+
+      <collision name="left_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>0.275 -0.6225 0.40 0 0 0</pose>
+      </collision>
+
+      <visual name="left_front_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>0.275 -0.6225 0.40 0 0 0</pose>
+        <material><script><name>Gazebo/Grey</name></script></material>
+      </visual>
+
+<!-- right front leg -->
+
+      <collision name="left_rear_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>0.275 0.6225 0.40 0 0 0</pose>
+      </collision>
+
+      <visual name="right_front_leg">
+        <geometry>
+          <box>
+            <size>0.05 0.075 0.80</size>
+          </box>
+        </geometry>
+        <pose>0.275 0.6225 0.40 0 0 0</pose>
+        <material><script><name>Gazebo/Grey</name></script></material>
+      </visual>
+
+<!-- inertial model -->
+
+      <inertial>
+	    <pose>0 0 ${(mesh_bbox_z/2+mesh_cmass_z)/mesh_scale} 0 0 0</pose>
+        <mass>${mass}</mass>
+        <inertia> <!-- interias are tricky to compute -->
+          <!-- http://answers.gazebosim.org/question/4372/the-inertia-matrix-explained/ -->
+          <ixx>${mesh_ixx*(mass/mesh_volume)*(1/(mesh_scale*mesh_scale))}</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>${mesh_iyy*(mass/mesh_volume)*(1/(mesh_scale*mesh_scale))}</iyy>
+          <iyz>0.0</iyz>
+          <izz>${mesh_izz*(mass/mesh_volume)*(1/(mesh_scale*mesh_scale))}</izz>
+        </inertia>
+      </inertial>
+      
+    </link>
+  </model>
+</sdf>
+

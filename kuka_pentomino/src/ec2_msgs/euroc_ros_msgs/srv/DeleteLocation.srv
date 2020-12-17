@@ -1,0 +1,9 @@
+#Deletes the navigation location from map
+
+#The location name
+string location_name
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

@@ -1,0 +1,12 @@
+#Move the joints along a given path
+
+#The requested joint path
+JointPath path
+
+#The motion parameters
+MotionParameters parameter
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

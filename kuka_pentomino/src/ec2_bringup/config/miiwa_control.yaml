@@ -1,0 +1,98 @@
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+# Forward Position Controllers ---------------------------------------
+miiwa_joint_x_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: miiwa_joint_x
+
+miiwa_joint_y_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: miiwa_joint_y
+
+miiwa_joint_theta_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: miiwa_joint_theta
+
+# Forward Position Trajectory Controller ------------------------------
+miiwa_joint_trajectory_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - miiwa_joint_x
+    - miiwa_joint_y
+    - miiwa_joint_theta
+
+# Forward Position Controllers ---------------------------------------
+schunk_pw70_joint_pan_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: schunk_pw70_joint_pan
+
+schunk_pw70_joint_tilt_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: schunk_pw70_joint_tilt
+
+# Forward Position Trajectory Controller ------------------------------
+schunkg_pw70_joint_trajectory_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - schunk_pw70_joint_pan
+    - schunk_pw70_joint_tilt
+
+# Forward Position Controllers ---------------------------------------
+schunk_wsg50_joint_left_jaw_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: schunk_wsg50_joint_left_jaw
+
+schunk_wsg50_joint_right_jaw_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: schunk_wsg50_joint_right_jaw
+
+# Forward Position Trajectory Controller ------------------------------
+schunkg_wsg50_joint_trajectory_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - schunk_wsg50_joint_left_jaw
+    - schunk_wsg50_joint_right_jaw
+
+# Forward Position Controllers ---------------------------------------
+lbr_iiwa_joint_1_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_1
+
+lbr_iiwa_joint_2_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_2
+
+lbr_iiwa_joint_3_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_3
+
+lbr_iiwa_joint_4_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_4
+
+lbr_iiwa_joint_5_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_5
+
+lbr_iiwa_joint_6_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_6
+
+lbr_iiwa_joint_7_forward_pos_controller:
+  type: position_controllers/JointPositionController
+  joint: lbr_iiwa_joint_7
+
+# Forward Position Trajectory Controller ------------------------------
+lbr_iiwa_joint_trajectory_position_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - lbr_iiwa_joint_1
+    - lbr_iiwa_joint_2
+    - lbr_iiwa_joint_3
+    - lbr_iiwa_joint_4
+    - lbr_iiwa_joint_5
+    - lbr_iiwa_joint_6
+    - lbr_iiwa_joint_7
+

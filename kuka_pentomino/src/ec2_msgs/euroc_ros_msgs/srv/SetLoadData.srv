@@ -1,0 +1,9 @@
+#Sets the load data attached to the arm flange
+
+#The load data 
+LoadData load
+
+---
+
+#Error message indicating failure - empty string = success
+string error_message

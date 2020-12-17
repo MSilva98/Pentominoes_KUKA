@@ -1,0 +1,24 @@
+# Moves the gripper jaws to the desired position for prepositioning the gripper jaws.
+
+# The desired position in [m]
+float32 position
+
+# The velocity of the movement in [m/s]
+float32 velocity
+
+# The maximum force encountered during the move [N]
+float32 force
+
+---
+
+# Indicates that the move reached the specified position
+uint8 MOVE_POSITION_REACHED=0
+
+# Indicates that the move reached the specified force
+uint8 MOVE_FORCE_REACHED=1
+
+# Indicates the result of the movement
+uint8 result
+
+# An optional error message. Empty = success
+string error_message

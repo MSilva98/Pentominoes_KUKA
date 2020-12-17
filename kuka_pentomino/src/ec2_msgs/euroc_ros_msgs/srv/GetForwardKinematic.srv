@@ -1,0 +1,12 @@
+#Returns the forward kinematic solution for a given joint position
+
+#The desired joint position
+JointPosition joint_position
+
+---
+
+#The resulting TCP pose
+TransformationXyzAbc tcp_pose
+
+#Error message indicating failure - empty string = success
+string error_message
