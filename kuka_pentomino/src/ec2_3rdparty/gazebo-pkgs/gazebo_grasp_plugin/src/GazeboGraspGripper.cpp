@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include <gazebo_grasp_plugin/GazeboGraspGripper.h>
-#include <gazebo_version_helpers/GazeboVersionHelpers.h>
+#include <gazebo_grasp_plugin/GazeboVersionHelpers.h>
 
 using gazebo::GazeboGraspGripper;
 
@@ -54,8 +54,12 @@ bool GazeboGraspGripper::Init(physics::ModelPtr &_model,
   this->attached = false;
   this->disableCollisionsOnAttach = _disableCollisionsOnAttach;
   this->model = _model;
-  physics::PhysicsEnginePtr physics =
-    gazebo::GetPhysics(this->model->GetWorld());
+
+  /* physics::PhysicsEnginePtr physics = */
+  /*   gazebo::GetPhysics(this->model->GetWorld()); */
+  physics::PhysicsEnginePtr physics = this->model->GetWorld()->Physics();
+
+
   this->fixedJoint = physics->CreateJoint("revolute");
 
   this->palmLink = this->model->GetLink(palmLinkName);
@@ -232,32 +236,31 @@ void GazeboGraspGripper::HandleDetach(const std::string &objName)
     obj->GetLink()->SetCollideMode("all");
   }
 
-  // TODO: remove this test print, for issue #26 ------------------- 
+  // TODO: remove this test print, for issue #26 -------------------
 #if 0
   if (obj && obj->GetLink())
   {
-    auto linVel = GetWorldVelocity(obj->GetLink());
+    auto linVel = obj->GetLink()->GetWorldLinearVel();
     gzmsg << "PRE-DETACH Velocity for link " << obj->GetLink()->GetName()
-          << " (collision name " << objName << "): " << linVel
-          << ", absolute val " << GetLength(linVel) << std::endl;
+          << " (collision name " << objName << "): "
+          << linVel << ", absolute val " << linVel.GetLength() << std::endl;
   }
 #endif
-  // ------------------- 
+  // -------------------
 
   this->fixedJoint->Detach();
 
-  // TODO: remove this test print, for issue #26 ------------------- 
+  // TODO: remove this test print, for issue #26 -------------------
 #if 0
   if (obj && obj->GetLink())
   {
-    auto linVel = GetWorldVelocity(obj->GetLink());
+    auto linVel = obj->GetLink()->GetWorldLinearVel();
     gzmsg << "POST-DETACH Velocity for link " << obj->GetLink()->GetName()
-          << " (collision name " << objName << "): " << linVel
-          << ", absolute val " << GetLength(linVel) << std::endl;
-
+          << " (collision name " << objName << "): "
+          << linVel << ", absolute val " << linVel.GetLength() << std::endl;
   }
 #endif
-  // ------------------- 
+  // -------------------
 
 #endif  // USE_MODEL_ATTACH
   this->attached = false;

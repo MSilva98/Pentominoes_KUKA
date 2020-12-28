@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+
 <robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
 xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
 xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
@@ -143,12 +144,12 @@ name="dlr_miiwa_sim" >
     />
   </xacro:mako_3d>
 
-  <xacro:mako_3d
-    name="cameras_tcp_rect/right"
-    parent_link="cameras_tcp_rect/left_link"
-  >
-    <origin xyz="${mako_3d_hand_relative_offset} 0 0" rpy="0.0 0.0 0.0"/>
-  </xacro:mako_3d>
+  <!-- <xacro:mako_3d -->
+  <!--   name="cameras_tcp_rect/right" -->
+  <!--   parent_link="cameras_tcp_rect/left_link" -->
+  <!-- > -->
+  <!--   <origin xyz="${mako_3d_hand_relative_offset} 0 0" rpy="0.0 0.0 0.0"/> -->
+  <!-- </xacro:mako_3d> -->
 
   <xacro:manta
     name="cameras_pan_tilt/left"
@@ -160,12 +161,12 @@ name="dlr_miiwa_sim" >
     />
   </xacro:manta>
 
-  <xacro:manta
-    name="cameras_pan_tilt/right"
-    parent_link="cameras_pan_tilt/left_link"
-  >
-    <origin xyz="${manta_mast_relative_offset} 0 0" rpy="0.0 0.0 0.0"/>
-  </xacro:manta>
+  <!-- <xacro:manta -->
+  <!--   name="cameras_pan_tilt/right" -->
+  <!--   parent_link="cameras_pan_tilt/left_link" -->
+  <!-- > -->
+    <!-- <origin xyz="${manta_mast_relative_offset} 0 0" rpy="0.0 0.0 0.0"/> -->
+  <!-- </xacro:manta> -->
 
     <!-- additions for gazebo -->
   <xacro:mako_depth_camera_gazebo

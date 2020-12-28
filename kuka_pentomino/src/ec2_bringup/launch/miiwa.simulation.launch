@@ -47,18 +47,18 @@
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="headless" value="$(arg headless)"/>
   </include>
-  
+
   <arg name="offsetX" default="0.0"/>
   <arg name="offsetY" default="-1.0" if="$(arg showcase)"/>
   <arg name="offsetY" default="0.0" unless="$(arg showcase)"/>
-  <param name="offsetX" value="$(arg offsetX)" type="double" /> 
+  <param name="offsetX" value="$(arg offsetX)" type="double" />
   <param name="offsetY" value="$(arg offsetY)" type="double" />
-  
-  
+
+
   <!-- spawn the model in the simulation -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	    args="-urdf -model dlr_miiwa -param robot_description -x $(arg offsetX) -y $(arg offsetY)"/>
 
- <node name="ec2_sim_wrapper" pkg="ec2_sim" type="simulation_wrapper.py" required="true" output="screen"/> 
- 
+ <node name="ec2_sim_wrapper" pkg="ec2_sim" type="simulation_wrapper.py" required="true" output="screen"/>
+
 </launch>

@@ -210,7 +210,7 @@ bool Solver::getDataFromTCP(cv::Mat& color, cv::Mat& depth,
     cv_bridge::CvImagePtr bridge_color;
     cv_bridge::CvImagePtr bridge_depth;
 
-    bool ok = ec2if_.getTCPcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(20));
+    bool ok = ec2if_.getTCPcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(10));
     if (not ok){
         return false;
     }
@@ -256,7 +256,7 @@ void Solver::solve()
     arm_.moveRelativeTCP((Affine3d)Translation3d(0.02,0.025,0.5), 0.4);
     gripper_.setPosition(0.02,0.1);
     arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,0.06), 0.4);
-    gripper_.setPosition(0.05,0.1);
+    gripper_.setPosition(0.06,0.1);
     arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,-0.06), 0.4);
     gripper_.setPosition(0.02,0.1);
 
@@ -265,11 +265,10 @@ void Solver::solve()
     cv::Mat color, depth;
     image_geometry::PinholeCameraModel model;
 
-    getDataFromTCP(color, model, true);
-    //getDataFromTCP(color, depth, model, true);
+    getDataFromTCP(color, depth, model, true);
     
     cv::imshow("color", color);
-    //cv::imshow("depth", depth);
+    cv::imshow("depth", depth);
     cv::waitKey(0);
 }
 

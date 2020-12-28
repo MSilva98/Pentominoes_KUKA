@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include <gazebo_grasp_plugin/GazeboGraspFix.h>
-#include <gazebo_version_helpers/GazeboVersionHelpers.h>
+#include <gazebo_grasp_plugin/GazeboVersionHelpers.h>
 
 using gazebo::GazeboGraspFix;
 using gazebo::GzVector3;
@@ -36,14 +36,6 @@ GazeboGraspFix::GazeboGraspFix(physics::ModelPtr _model)
 ////////////////////////////////////////////////////////////////////////////////
 GazeboGraspFix::~GazeboGraspFix()
 {
-  // Release filter to make it safe to reload the model with plugin
-  if (!filter_name.empty() && this->world)
-  {
-    physics::PhysicsEnginePtr physics = GetPhysics(this->world);
-    physics::ContactManager *contactManager = physics->GetContactManager();
-    if (contactManager)
-        contactManager->RemoveFilter(filter_name);
-  }
   this->update_connection.reset();
   if (this->node) this->node->Fini();
   this->node.reset();
@@ -264,13 +256,12 @@ void GazeboGraspFix::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // ++++++++++++ start up things +++++++++++++++
 
-  physics::PhysicsEnginePtr physics = GetPhysics(this->world);
+  physics::PhysicsEnginePtr physics = this->world->Physics();
   this->node->Init(gazebo::GetName(*(this->world)));
   physics::ContactManager *contactManager = physics->GetContactManager();
   contactManager->PublishContacts();  // TODO not sure this is required?
 
-  filter_name = model->GetScopedName();
-  std::string topic = contactManager->CreateFilter(filter_name,
+  std::string topic = contactManager->CreateFilter(model->GetScopedName(),
                       collisionNames);
   if (!this->contactSub)
   {
@@ -560,20 +551,18 @@ void GazeboGraspFix::OnUpdate()
     const ObjectContactInfo &objContInfo = ocIt->second;
 
     // gzmsg<<"Number applied forces on "<<objName<<": "<<objContInfo.appliedForces.size()<<std::endl;
-  
-    // TODO: remove this test print, for issue #26 ------------------- 
+
+    // TODO: remove this test print, for issue #26 -------------------
 #if 0
-    physics::CollisionPtr objColl =
-      boost::dynamic_pointer_cast<physics::Collision>(GetEntityByName(world, objName));
+    physics::CollisionPtr objColl = boost::dynamic_pointer_cast<physics::Collision>
+                              (world->GetEntity(objName));
     if (objColl && objColl->GetLink())
     {
-      auto linVel = GetWorldVelocity(objColl->GetLink());
-      gzmsg << "Velocity for link " << objColl->GetLink()->GetName()
-        << " (collision name " << objName << "): " << linVel
-        << ", absolute val " << GetLength(linVel) << std::endl;
+      auto linVel = objColl->GetLink()->GetWorldLinearVel();
+      gzmsg << "Velocity for link " << objColl->GetLink()->GetName() << " (collision name " << objName << "): " << linVel << ", absolute val " << linVel.GetLength() << std::endl;
     }
 #endif
-    // ------------------- 
+    // -------------------
 
     float minAngleDiff = this->forcesAngleTolerance; //120 * M_PI/180;
     if (!CheckGrip(objContInfo.appliedForces, minAngleDiff, 0.3))

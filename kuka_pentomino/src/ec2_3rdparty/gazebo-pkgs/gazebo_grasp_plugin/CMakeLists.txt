@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   std_msgs
-  gazebo_version_helpers
 )
 
 find_package(gazebo REQUIRED)
@@ -31,7 +30,7 @@ find_package(gazebo REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_grasp_fix
-  CATKIN_DEPENDS gazebo_ros geometry_msgs roscpp std_msgs gazebo_version_helpers
+  CATKIN_DEPENDS gazebo_ros geometry_msgs roscpp std_msgs
   DEPENDS gazebo
 )
 
@@ -65,7 +64,7 @@ link_directories(
 )
 
 ## Declare a cpp library
-add_library(gazebo_grasp_fix SHARED src/GazeboGraspFix.cpp src/GazeboGraspGripper.cpp)
+add_library(gazebo_grasp_fix SHARED src/GazeboGraspFix.cpp src/GazeboGraspGripper.cpp src/GazeboVersionHelpers.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -74,9 +73,8 @@ add_dependencies(gazebo_grasp_fix ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 
-target_link_libraries(gazebo_grasp_fix 
-	${catkin_LIBRARIES} 
-	${GAZEBO_LIBRARIES} 
+target_link_libraries(gazebo_grasp_fix
+	${GAZEBO_LIBRARIES}
 	${Boost_LIBRARIES}
 )
 

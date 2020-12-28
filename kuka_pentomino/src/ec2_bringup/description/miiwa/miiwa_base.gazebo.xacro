@@ -23,7 +23,7 @@
    </joint>
 
    <link name="tcp_stereo_left_rect"/>
-   
+
    <joint name="tcp_stereo_left_gazebo_optical" type="fixed">
       <child link="tcp_stereo_left_gazebo_optical_link" />
       <parent link="${parent_link}"/>
@@ -42,7 +42,7 @@
            <height>964</height>
          </image>
        </camera>
-       <plugin name="depth_camera_controller" filename="libgazebo_ros_depth_camera.so">
+       <plugin name="depth_camera_controller" filename="libgazebo_ros_openni_kinect.so">
          <alwaysOn>true</alwaysOn>
          <updateRate>${rate}</updateRate>
          <cameraName>${name}</cameraName>
@@ -50,7 +50,7 @@
          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
          <pointCloudTopicName>point_cloud</pointCloudTopicName>
          <depthImageTopicName>depth</depthImageTopicName>
-         <depthImageCameraInfoTopicName>camera_info</depthImageCameraInfoTopicName>
+         <!-- <depthImageCameraInfoTopicName>camera_info</depthImageCameraInfoTopicName> -->
          <pointCloudCutoff>0.10</pointCloudCutoff>
          <frameName>tcp_stereo_left_rect</frameName>
        </plugin>
@@ -78,7 +78,7 @@
            <height>1234</height>
          </image>
        </camera>
-       <plugin name="depth_camera_controller" filename="libgazebo_ros_depth_camera.so">
+       <plugin name="depth_camera_controller" filename="libgazebo_ros_openni_kinect.so">
          <alwaysOn>true</alwaysOn>
          <updateRate>${rate}</updateRate>
          <cameraName>${name}</cameraName>
@@ -86,7 +86,7 @@
          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
          <pointCloudTopicName>point_cloud</pointCloudTopicName>
          <depthImageTopicName>depth</depthImageTopicName>
-         <depthImageCameraInfoTopicName>camera_info</depthImageCameraInfoTopicName>
+         <!-- <depthImageCameraInfoTopicName>camera_info</depthImageCameraInfoTopicName> -->
          <pointCloudCutoff>0.4</pointCloudCutoff>
          <frameName>${parent_link}</frameName>
        </plugin>

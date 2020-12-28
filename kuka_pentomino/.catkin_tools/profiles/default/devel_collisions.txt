@@ -1,0 +1,3 @@
+/home/msilva/5ano/1semestre/RMI/Pentaminoes_KUKA/kuka_pentomino/devel/./cmake.lock 12
+/home/nuno/Aulas/RMI_opcao_2021/docs/praticas/tfinal/kuka_pentomino/devel/./cmake.lock 973
+/home/msilva/5ano/1semestre/RMI/kuka_pentomino/devel/./cmake.lock 84
