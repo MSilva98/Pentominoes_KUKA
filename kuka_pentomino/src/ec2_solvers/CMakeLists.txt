@@ -112,6 +112,8 @@ include_directories(
 add_executable(solver src/solver.cpp)
 target_link_libraries(solver ${catkin_LIBRARIES})
 
+add_executable(solver_v2 src/solver_v2.cpp)
+target_link_libraries(solver_v2 ${catkin_LIBRARIES})
 
 #############
 ## Install ##

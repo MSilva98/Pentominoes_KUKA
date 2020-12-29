@@ -1,8 +1,7 @@
-
 #include <Eigen/Geometry>
 #include <Eigen/Geometry>
 
-#include <ec2_solvers/solver.h>
+#include <ec2_solvers/solver_v2.h>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
@@ -14,8 +13,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace ec2
-{
+namespace ec2 {
 
     Solver::Solver(const std::string &name)
         : name_(name),
@@ -247,21 +245,52 @@ namespace ec2
         return true;
     }
 
+    void Solver::revert()
+    {
+        ec2if_.connect(true, true, false);
+        ros::Duration(0.5).sleep();
+
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
+        arm_.moveRelativeTCP((Affine3d)Translation3d(-0.02, -0.025, -0.5), 0.4);
+        arm_.moveRelativeTCP((Affine3d)AngleAxisd(-M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
+        arm_.moveRelativeTCP((Affine3d)Translation3d(-0.6, 0.0, 0.6), 0.4);
+        arm_.moveRelativeTCP((Affine3d)AngleAxisd(45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
+        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
+
+        ros::Duration(0.5).sleep();
+    }
+
     void Solver::solve()
     {
         ec2if_.connect(true, true, false);
         ros::Duration(0.5).sleep();
 
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
+            
+
         arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
-        gripper_.setPosition(0.02, 0.1);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
-        gripper_.setPosition(0.06, 0.1);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
-        gripper_.setPosition(0.02, 0.1);
+
+        ros::Duration(0.5).sleep();
+
+        arm_.moveRelativeTCP((Affine3d)AngleAxisd(45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
+        
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
+        
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
+        
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
+        
+        // gripper_.setPosition(0.02, 0.1);
+        
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
+        
+        // gripper_.setPosition(0.06, 0.1);
+        
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
+        
+        // gripper_.setPosition(0.02, 0.1);
 
         ros::Duration(0.5).sleep();
 
@@ -270,12 +299,13 @@ namespace ec2
 
         getDataFromTCP(color, depth, model, true);
 
-        cv::imshow("color", color);
-        cv::imshow("depth", depth);
-        cv::waitKey(0);
+        // revert();
+        
+        // cv::imshow("color", color);
+        // cv::imshow("depth", depth);
+        // cv::waitKey(0);
     }
-
-} // namespace ec2
+}
 
 int main(int argc, char *argv[])
 {
