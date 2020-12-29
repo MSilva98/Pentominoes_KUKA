@@ -2,7 +2,9 @@
 
 . devel/setup.bash
 
-echo "devel/setup.bash"
+echo "devel/setup.bash\n"
 
-roslaunch ec2_solvers solver
+# rosrun ec2_solvers solver
+rosrun ec2_solvers solver_v2
+
 
