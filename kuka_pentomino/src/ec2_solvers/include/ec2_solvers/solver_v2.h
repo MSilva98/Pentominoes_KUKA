@@ -25,6 +25,8 @@ public:
 
     virtual void revert();
 
+    void matchImages(cv::Mat ref, cv::Mat tpl);
+
     void waitForArmMotion();
 
     bool resetArm(bool blocking = true);

@@ -10,6 +10,10 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
+#include <unistd.h>
+#include <stdio.h>
+#include <limits.h>
+
 using namespace Eigen;
 using namespace std;
 
@@ -250,12 +254,10 @@ namespace ec2 {
         ec2if_.connect(true, true, false);
         ros::Duration(0.5).sleep();
 
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
         arm_.moveRelativeTCP((Affine3d)Translation3d(-0.02, -0.025, -0.5), 0.4);
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(-M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
         arm_.moveRelativeTCP((Affine3d)Translation3d(-0.6, 0.0, 0.6), 0.4);
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
         arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
 
         ros::Duration(0.5).sleep();
@@ -267,43 +269,80 @@ namespace ec2 {
         ros::Duration(0.5).sleep();
 
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
-            
-
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
-
-        ros::Duration(0.5).sleep();
-
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
-        
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
-        
         // arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
-        
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
         
         // gripper_.setPosition(0.02, 0.1);
-        
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
-        
         // gripper_.setPosition(0.06, 0.1);
-        
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
-        
         // gripper_.setPosition(0.02, 0.1);
 
-        ros::Duration(0.5).sleep();
+        // ros::Duration(0.5).sleep();
 
         cv::Mat color, depth;
         image_geometry::PinholeCameraModel model;
-
+        
         getDataFromTCP(color, depth, model, true);
 
-        // revert();
+        // cv::Mat tpl1 = ;
+        // cv::Mat tpl2 = ;
         
+        // cout << matchImages(color, cv::imread("./pentominoDetection/p.png")) << endl;
+        matchImages(color, cv::imread("./pentominoDetection/p_v2.png"));
+
         // cv::imshow("color", color);
+        // cv::imwrite("color.png", color);
         // cv::imshow("depth", depth);
         // cv::waitKey(0);
+    }
+
+    void Solver::matchImages(cv::Mat ref, cv::Mat tpl){
+
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            printf("Current working dir: %s\n", cwd);
+        } else {
+            perror("getcwd() error");
+        }
+   
+        // cv::Mat ref = cv::imread("./pentominoDetection/color.png");
+        // cv::Mat tpl = cv::imread("./pentominoDetection/p.png");
+        
+        if(ref.empty() || tpl.empty())
+        {
+            cout << "Error reading file(s)!" << endl;
+            cout << tpl << endl;
+        }
+
+        cv::Mat res_32f(ref.rows - tpl.rows + 1, ref.cols - tpl.cols + 1, CV_32FC1);
+        cv::matchTemplate(ref, tpl, res_32f, CV_TM_CCOEFF_NORMED);
+
+        cv::Mat res;
+        res_32f.convertTo(res, CV_8U, 255.0);
+
+        int size = ((tpl.cols + tpl.rows) / 4) * 2 + 1; //force size to be odd
+        cv::adaptiveThreshold(res, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, size, -128);
+
+        while (true) 
+        {
+            double minval, maxval, threshold = 0.8;
+            cv::Point minloc, maxloc;
+            cv::minMaxLoc(res, &minval, &maxval, &minloc, &maxloc);
+
+            if (maxval >= threshold)
+            {
+                cv::rectangle(ref, maxloc, cv::Point(maxloc.x + tpl.cols, maxloc.y + tpl.rows), CV_RGB(0,255,0), 2);
+                cv::floodFill(res, maxloc, 0); //mark drawn blob
+            }
+            else
+                break;
+        }
+
+        cv::imshow("final", ref);
+        cv::waitKey(0);
     }
 }
 
@@ -313,6 +352,7 @@ int main(int argc, char *argv[])
     ec2::Solver solver("solver");
 
     solver.solve();
+    // solver.matchImages("./pentominoDetection/color.png", "./pentominoDetection/p.png");
 
     ros::spin();
 
