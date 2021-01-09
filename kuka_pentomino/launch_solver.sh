@@ -7,7 +7,7 @@ catkin build ec2_solvers
 echo ". devel/setup.bash\n"
 echo ""
 
-# rosrun ec2_solvers solver
-rosrun ec2_solvers solver_v2
+rosrun ec2_solvers solver
+# rosrun ec2_solvers solver_v2
 
 

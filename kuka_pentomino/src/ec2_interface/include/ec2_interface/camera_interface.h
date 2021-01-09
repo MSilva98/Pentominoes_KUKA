@@ -67,6 +67,9 @@ public:
     bool connect(const std::string& name);
 
     bool connectNoDepth(const std::string& name);
+
+    bool getPosition(boost::array<double, 12> &p);
+    
 private:
 
     ros::NodeHandle node_;
@@ -103,6 +106,7 @@ private:
 
     ros::ServiceClient param_set_white_mode_;
     ros::ServiceClient param_set_white_value_;
+
 };
 
 } /* ec2  */

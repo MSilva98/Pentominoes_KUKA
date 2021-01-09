@@ -251,28 +251,39 @@ namespace ec2
     {
         ec2if_.connect(true, true, false);
         ros::Duration(0.5).sleep();
+        
+        boost::array<double, 12> pos;
 
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
-        arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
-        gripper_.setPosition(0.02, 0.1);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
-        gripper_.setPosition(0.06, 0.1);
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
-        gripper_.setPosition(0.02, 0.1);
+        bool ok = ec2if_.getPTcam()->getPosition(pos);
 
-        ros::Duration(0.5).sleep();
+        if(ok){
+            for(int i = 0; i < 12; i++){
+                ROS_INFO("POSITION [%f]", pos[i]);
+            }
+            
+        }    
 
-        cv::Mat color, depth;
-        image_geometry::PinholeCameraModel model;
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
+        // gripper_.setPosition(0.02, 0.1);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
+        // gripper_.setPosition(0.06, 0.1);
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.06), 0.4);
+        // gripper_.setPosition(0.02, 0.1);
 
-        getDataFromTCP(color, depth, model, true);
+        // ros::Duration(0.5).sleep();
 
-        cv::imshow("color", color);
-        cv::imshow("depth", depth);
-        cv::waitKey(0);
+        // cv::Mat color, depth;
+        // image_geometry::PinholeCameraModel model;
+
+        // getDataFromTCP(color, depth, model, true);
+
+        // cv::imshow("color", color);
+        // cv::imshow("depth", depth);
+        // cv::waitKey(0);
     }
 
 } // namespace ec2
