@@ -247,21 +247,105 @@ namespace ec2
         return true;
     }
 
+    bool Solver::getPositionToBaseTCP(Eigen::Vector3d &v, bool now){
+
+        // this is only use here and nowhere else
+        static ros::Time latest_stamp(0);
+        ros::Time stamp = now ? ros::Time::now() : latest_stamp;
+
+        Eigen::Affine3d tf;
+        image_geometry::PinholeCameraModel model;
+        cv_bridge::CvImagePtr bridge_color;
+        cv_bridge::CvImagePtr bridge_depth;
+
+        bool ok = ec2if_.getTCPcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(10));
+        if (not ok)
+        {
+            return false;
+        }
+
+        ok = getTransformation("iiwa_base", model.tfFrame(), tf);
+        if (not ok)
+        {
+            return false;
+        }
+        v = tf.linear()*Eigen::Vector3d(0.0, 0.0, 0.0)+tf.translation();
+        return true;
+    }
+
+    bool Solver::getPositionToBasePT(Eigen::Vector3d &v, bool now){
+
+        // this is only use here and nowhere else
+        static ros::Time latest_stamp(0);
+        ros::Time stamp = now ? ros::Time::now() : latest_stamp;
+
+        Eigen::Affine3d tf;
+        image_geometry::PinholeCameraModel model;
+        cv_bridge::CvImagePtr bridge_color;
+        cv_bridge::CvImagePtr bridge_depth;
+
+        bool ok = ec2if_.getPTcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(10));
+        if (not ok)
+        {
+            return false;
+        }
+
+        ok = getTransformation("iiwa_base", model.tfFrame(), tf);
+        if (not ok)
+        {
+            return false;
+        }
+        v = tf.linear()*Eigen::Vector3d(0.0, 0.0, 0.0)+tf.translation();
+        return true;
+    }
+
     void Solver::solve()
     {
         ec2if_.connect(true, true, false);
         ros::Duration(0.5).sleep();
-        
-        boost::array<double, 12> pos;
 
-        bool ok = ec2if_.getPTcam()->getPosition(pos);
+        Eigen::Vector3d v;
+        bool ok;
 
+        ok = getPositionToBasePT(v, true);
         if(ok){
-            for(int i = 0; i < 12; i++){
-                ROS_INFO("POSITION [%f]", pos[i]);
-            }
-            
-        }    
+            cout << "PT To Base: " << v.transpose() << endl;
+        }
+        else {
+            ROS_WARN("Was not possible to obtain PT position");
+        }
+
+        ok = getPositionToBaseTCP(v, true);
+        if(ok){
+            cout << "TCP To Base: " << v.transpose() << endl;
+        }
+        else {
+            ROS_WARN("Was not possible to obtain TCP position");
+        }
+        
+        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+
+        ros::Duration(0.5).sleep();
+
+        ok = getPositionToBasePT(v, true);
+        if(ok){
+            cout << "PT To Base: " << v.transpose() << endl;
+        }
+        else {
+            ROS_WARN("Was not possible to obtain PT position");
+        }
+
+        ok = getPositionToBaseTCP(v, true);
+        if(ok){
+            cout << "TCP To Base: " << v.transpose() << endl;
+        }
+        else {
+            ROS_WARN("Was not possible to obtain TCP position");
+        }
+
+        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
+
+
 
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
         // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);

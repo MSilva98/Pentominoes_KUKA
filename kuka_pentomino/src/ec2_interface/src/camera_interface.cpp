@@ -279,25 +279,6 @@ namespace ec2
         return true;
     }
 
-    bool CameraInterface::getPosition(boost::array<double, 12> &pos)
-    {
-
-        while (node_.ok())
-        {
-            sensor_msgs::CameraInfo ci = *camera_info_;
-            // if (ci.header.frame_id.c_str() == std::string("cameras_pan_tilt/left_link"))
-            // {
-                // ROS_INFO("MESSAGE [%s] [%f]", ci.header.frame_id.c_str(), ci.P[0]);
-                // Export data HERE
-            pos = ci.P;
-            return true;
-            // }
-
-        } // end while;
-
-        return false;
-    }
-
     void CameraInterface::onMessages(const sensor_msgs::ImageConstPtr &rgb,
                                      const sensor_msgs::ImageConstPtr &depth,
                                      const sensor_msgs::CameraInfoConstPtr &camera_info)
