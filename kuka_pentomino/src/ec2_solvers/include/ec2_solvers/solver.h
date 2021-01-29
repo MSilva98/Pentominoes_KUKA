@@ -93,10 +93,11 @@ protected:
                         image_geometry::PinholeCameraModel& model,
                         bool now = true);
 
-    
+    bool getTCPModel(image_geometry::PinholeCameraModel &model, bool now);
+    bool getPTModel(image_geometry::PinholeCameraModel &model, bool now);
     bool getPositionToBaseTCP(Eigen::Vector3d &v, bool now);
     bool getPositionToBasePT(Eigen::Vector3d &v, bool now);
-
+    
     void info(const char* fmt, ...);
     void warn(const char* fmt, ...);
     void error(const char* fmt, ...);

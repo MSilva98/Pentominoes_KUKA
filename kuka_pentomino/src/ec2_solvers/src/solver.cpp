@@ -247,14 +247,11 @@ namespace ec2
         return true;
     }
 
-    bool Solver::getPositionToBaseTCP(Eigen::Vector3d &v, bool now){
-
+    bool Solver::getTCPModel(image_geometry::PinholeCameraModel &model, bool now){
         // this is only use here and nowhere else
         static ros::Time latest_stamp(0);
         ros::Time stamp = now ? ros::Time::now() : latest_stamp;
 
-        Eigen::Affine3d tf;
-        image_geometry::PinholeCameraModel model;
         cv_bridge::CvImagePtr bridge_color;
         cv_bridge::CvImagePtr bridge_depth;
 
@@ -263,24 +260,14 @@ namespace ec2
         {
             return false;
         }
-
-        ok = getTransformation("iiwa_base", model.tfFrame(), tf);
-        if (not ok)
-        {
-            return false;
-        }
-        v = tf.linear()*Eigen::Vector3d(0.0, 0.0, 0.0)+tf.translation();
         return true;
     }
 
-    bool Solver::getPositionToBasePT(Eigen::Vector3d &v, bool now){
-
+    bool Solver::getPTModel(image_geometry::PinholeCameraModel &model, bool now){
         // this is only use here and nowhere else
         static ros::Time latest_stamp(0);
         ros::Time stamp = now ? ros::Time::now() : latest_stamp;
 
-        Eigen::Affine3d tf;
-        image_geometry::PinholeCameraModel model;
         cv_bridge::CvImagePtr bridge_color;
         cv_bridge::CvImagePtr bridge_depth;
 
@@ -289,13 +276,45 @@ namespace ec2
         {
             return false;
         }
+        return true;
+    }
 
+
+    bool Solver::getPositionToBaseTCP(Eigen::Vector3d &v, bool now){
+        bool ok;
+        Eigen::Affine3d tf;
+        image_geometry::PinholeCameraModel model;
+        ok = getTCPModel(model, now);
+        if (not ok)
+        {
+            return false;
+        }
+        
         ok = getTransformation("iiwa_base", model.tfFrame(), tf);
         if (not ok)
         {
             return false;
         }
-        v = tf.linear()*Eigen::Vector3d(0.0, 0.0, 0.0)+tf.translation();
+        v = tf*Eigen::Vector3d(0.0,0.0,0.0);
+        return true;
+    }
+
+    bool Solver::getPositionToBasePT(Eigen::Vector3d &v, bool now){
+        bool ok;
+        Eigen::Affine3d tf;
+        image_geometry::PinholeCameraModel model;
+        ok = getPTModel(model, now);
+        if (not ok)
+        {
+            return false;
+        }
+        
+        ok = getTransformation("iiwa_base", model.tfFrame(), tf);
+        if (not ok)
+        {
+            return false;
+        }
+        v = tf*Eigen::Vector3d(0.0,0.0,0.0);
         return true;
     }
 
@@ -304,46 +323,104 @@ namespace ec2
         ec2if_.connect(true, true, false);
         ros::Duration(0.5).sleep();
 
-        Eigen::Vector3d v;
-        bool ok;
-
-        ok = getPositionToBasePT(v, true);
-        if(ok){
-            cout << "PT To Base: " << v.transpose() << endl;
-        }
-        else {
-            ROS_WARN("Was not possible to obtain PT position");
-        }
-
-        ok = getPositionToBaseTCP(v, true);
-        if(ok){
-            cout << "TCP To Base: " << v.transpose() << endl;
-        }
-        else {
-            ROS_WARN("Was not possible to obtain TCP position");
-        }
+        cv::Mat color, depth;
+        image_geometry::PinholeCameraModel modelPT;
+        getDataFromPT(color, depth, modelPT, true);   // format BGR
         
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+        modelPT.rectifyImage(color,color,cv::INTER_LINEAR);
 
-        ros::Duration(0.5).sleep();
+        cv::Point2d pixel;
+        // Get pixel of colored piece
+        for(int r = 0; r < color.rows; r++){
+            for(int c = 0; c < color.cols; c++){
+                cv::Vec3b &pix = color.at<cv::Vec3b>(r,c);  // color.at(y,x) -> r = y, c = x
+                if(pix[2] > 135){               // looking for blue piece, which is red because BGR not RGB
+                    pix[0] = 0;
+                    pix[1] = 0;
+                    pix[2] = 0;
+                    color.at<cv::Vec3b>(r,c) = pix;
+                    pixel = cv::Point2d(c,r);   // columns are X and rows are Y
+                }
+            }
+        }
+        // Rectify Point
+        pixel = modelPT.rectifyPoint(pixel);
+        cout << pixel << endl;
 
-        ok = getPositionToBasePT(v, true);
-        if(ok){
-            cout << "PT To Base: " << v.transpose() << endl;
-        }
-        else {
-            ROS_WARN("Was not possible to obtain PT position");
-        }
+        // Convert 2d point to 3d ray passing in point P
+        // Vector V
+        cv::Point3d ray;
+        ray = modelPT.projectPixelTo3dRay(pixel);   // The pixel corresponds to a ray that starts at your camera position and passes through the point P (in your camera frame)
+        cout << "3d Ray: " << ray << endl;
+        
+        // Transformation from PanTilt to Base
+        Eigen::Affine3d tf;
+        getTransformation("iiwa_base", modelPT.tfFrame(), tf);
+        // V tranform to Base -> VBase
+        Eigen::Vector3d VBase = tf*Eigen::Vector3d(ray.x, ray.y, ray.z);
 
-        ok = getPositionToBaseTCP(v, true);
-        if(ok){
-            cout << "TCP To Base: " << v.transpose() << endl;
-        }
-        else {
-            ROS_WARN("Was not possible to obtain TCP position");
-        }
+        // PanTilt Camera position
+        Eigen::Vector3d posCamPT = tf*Eigen::Vector3d(0.0,0.0,0.0);
+        cout << "Vector Base: " << VBase.transpose() << "\nPT pos: " << posCamPT.transpose() << endl;
 
-        arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
+        // Pentaminoes Z surface
+        uint32_t Zsuperficie = 0.85;
+        uint32_t scalar = (Zsuperficie-posCamPT.z())/VBase.z();    
+        
+        Eigen::Vector3d ptP5 = posCamPT + scalar*VBase;
+
+        cout << "SCALAR: " << scalar << "\nP5: " << ptP5.transpose() << endl;
+
+        // lookAt(ptP5, 0, 0.2, false);
+
+
+        // lookAt(Eigen::Vector3d(0.555, -0.04, 0.0),0,0.2,false);
+        // Get something close to [0.555479, -0.0419522, 0.120125]
+
+
+
+        // ----------------------
+        // CAMERA POSITION TEST |
+        // ----------------------
+        // Eigen::Vector3d v;
+        // bool ok;
+        // ok = getPositionToBasePT(v, true);
+        // if(ok){
+        //     cout << "PT To Base: " << v.transpose() << endl;
+        // }
+        // else {
+        //     ROS_WARN("Was not possible to obtain PT position");
+        // }
+
+        // ok = getPositionToBaseTCP(v, true);
+        // if(ok){
+        //     cout << "TCP To Base: " << v.transpose() << endl;
+        // }
+        // else {
+        //     ROS_WARN("Was not possible to obtain TCP position");
+        // }
+        
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
+
+        // ros::Duration(0.5).sleep();
+
+        // ok = getPositionToBasePT(v, true);
+        // if(ok){
+        //     cout << "PT To Base: " << v.transpose() << endl;
+        // }
+        // else {
+        //     ROS_WARN("Was not possible to obtain PT position");
+        // }
+
+        // ok = getPositionToBaseTCP(v, true);
+        // if(ok){
+        //     cout << "TCP To Base: " << v.transpose() << endl;
+        // }
+        // else {
+        //     ROS_WARN("Was not possible to obtain TCP position");
+        // }
+
+        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
 
 
 
@@ -352,6 +429,11 @@ namespace ec2
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.6, 0.0, -0.6), 0.4);
         // arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0, 0.0, 0.0)), 0.4);
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.02, 0.025, 0.5), 0.4);
+
+        // Eigen::Vector3d vec;
+        // getPositionToBaseTCP(vec, true);
+        // cout << vec << endl;
+
         // gripper_.setPosition(0.02, 0.1);
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.06), 0.4);
         // gripper_.setPosition(0.06, 0.1);
@@ -377,6 +459,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "solver");
     ec2::Solver solver("solver");
 
+    solver.setPT(0.7, -0.85);
     solver.solve();
 
     ros::spin();
