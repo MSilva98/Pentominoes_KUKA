@@ -20,7 +20,7 @@ int main(){
 
     Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat, image;
 
-    frame = imread("imgP.png", IMREAD_COLOR);
+    frame = imread("imgP2.png", IMREAD_COLOR);
 
 
     bitwise_xor(b,frame,diff_im);
@@ -71,83 +71,84 @@ int main(){
     }
 
     // Load Templates
-    // vector<Mat> templates;
-    // templates.push_back(imread("F.png", IMREAD_COLOR));
-    // templates.push_back(imread("L.png", IMREAD_COLOR));
-    // templates.push_back(imread("N.png", IMREAD_COLOR));
-    // templates.push_back(imread("P.png", IMREAD_COLOR));
-    // templates.push_back(imread("U.png", IMREAD_COLOR));
-    // templates.push_back(imread("X.png", IMREAD_COLOR));
-    
-    // vector<Mat> res;
-    // Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    // for( size_t i = 0; i< contours.size(); i++ ){
-    //     Mat t = Mat::zeros(thresholdedImage.size(), CV_8UC3);
-    //     drawContours(t, contours, i, color, CV_FILLED);
-    //     for (int j = 0; j < contours[i].size(); ++j){
-    //         circle(t, contours[i][j], 5, Scalar(255,255,255));
-    //     }
-    //     Rect roi = boundingRect(contours[i]);
-    //     roi.x = roi.x*0.99;
-    //     roi.y = roi.y*0.99;
-    //     roi.width = roi.width*1.1;
-    //     roi.height = roi.height*1.1;
-    //     Mat f(t,roi);
-    //     resize(f,f,Size(600,600));
-    //     res.push_back(f);
-    // }
+    vector<Mat> templates;
+    templates.push_back(imread("F.png", IMREAD_GRAYSCALE));
+    templates.push_back(imread("L.png", IMREAD_GRAYSCALE));
+    templates.push_back(imread("N.png", IMREAD_GRAYSCALE));
+    templates.push_back(imread("P.png", IMREAD_GRAYSCALE));
+    templates.push_back(imread("U.png", IMREAD_GRAYSCALE));
+    templates.push_back(imread("X.png", IMREAD_GRAYSCALE));
 
-    // for( size_t i = 0; i< res.size(); i++ ){
-    //     string name = "contours" + to_string(i) + ".png";
-    //     imshow(name, res[i]);
-    //     // imwrite(name, res[i]);
-    // }
-
-    // normalizeAndCompare(templates, res);
-
-    // // Draw contours.
+    vector<Mat> res;
+    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
     for( size_t i = 0; i< contours.size(); i++ ){
-        
-        // if (contours[i].size() > 5){
-            for (int j = 0; j < contours[i].size(); ++j)
-            {
-                circle(output, contours[i][j], 5, Scalar(255,255,255));
-            }
-            cout << contours[i].size() << endl;
-            cout << arcLength(contours[i], true) << endl;
-            Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-            drawContours(output, contours, i, color, 2);
-            
-            // if(contours[i].size() == 6){
-            //     putText(output, "P or L", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
-            // }
-            // else if(contours[i].size() == 8){
-            //     putText(output, "U or N", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
-            // }
-            // else if(contours[i].size() == 10){
-            //     putText(output, "F", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
-            // }
-            // else if(contours[i].size() == 12){
-            //     putText(output, "X", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
-            // }
-            
-            cout << "POINT " << i << endl;
-            for( int j = 0; j< contours[i].size(); j++ ){
-            Point pt = contours[i][j];
-            // cout << pt.x << ", " << pt.y << endl;
-            }
-        // }   
+        Mat t = Mat::zeros(thresholdedImage.size(), CV_8UC3);
+        drawContours(t, contours, i, color, CV_FILLED);
+        // for (int j = 0; j < contours[i].size(); ++j){
+        //     circle(t, contours[i][j], 5, Scalar(255,255,255));
+        // }
+        Rect roi = boundingRect(contours[i]);
+        roi.x = roi.x*0.99;
+        roi.y = roi.y*0.99;
+        roi.width = roi.width*1.1;
+        roi.height = roi.height*1.1;
+        Mat f(t,roi);
+        // resize(f,f,Size(600,600));
+        cvtColor(f, f, COLOR_BGR2GRAY);
+        res.push_back(f);
     }
 
-    // create windows to display images
-    namedWindow("image", WINDOW_AUTOSIZE);
-    namedWindow("canny", WINDOW_AUTOSIZE);
-    namedWindow("contours", WINDOW_AUTOSIZE);
+    for( size_t i = 0; i< res.size(); i++ ){
+        string name = "contours" + to_string(i) + ".png";
+        imshow(name, res[i]);
+        // imwrite(name, res[i]);
+    }
+
+    normalizeAndCompare(templates, res);
+
+    // // Draw contours.
+    // for( size_t i = 0; i< contours.size(); i++ ){
+        
+    //     // if (contours[i].size() > 5){
+    //         for (int j = 0; j < contours[i].size(); ++j)
+    //         {
+    //             circle(output, contours[i][j], 5, Scalar(255,255,255));
+    //         }
+    //         cout << contours[i].size() << endl;
+    //         cout << arcLength(contours[i], true) << endl;
+    //         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    //         drawContours(output, contours, i, color, 2);
+            
+    //         // if(contours[i].size() == 6){
+    //         //     putText(output, "P or L", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
+    //         // }
+    //         // else if(contours[i].size() == 8){
+    //         //     putText(output, "U or N", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
+    //         // }
+    //         // else if(contours[i].size() == 10){
+    //         //     putText(output, "F", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
+    //         // }
+    //         // else if(contours[i].size() == 12){
+    //         //     putText(output, "X", contours[i][0], FONT_HERSHEY_COMPLEX, 0.8, cvScalar(255,255,255), 1, CV_AA);
+    //         // }
+            
+    //         cout << "POINT " << i << endl;
+    //         for( int j = 0; j< contours[i].size(); j++ ){
+    //         Point pt = contours[i][j];
+    //         // cout << pt.x << ", " << pt.y << endl;
+    //         }
+    //     // }   
+    // }
+
+    // // create windows to display images
+    // namedWindow("image", WINDOW_AUTOSIZE);
+    // namedWindow("canny", WINDOW_AUTOSIZE);
+    // namedWindow("contours", WINDOW_AUTOSIZE);
     
-    // display images
-    imshow("image", image);
-    imshow("contours", output );
-    imshow("canny", thresholdedImage);
+    // // display images
+    // imshow("image", image);
+    // imshow("contours", output );
+    // imshow("canny", thresholdedImage);
 
     //Press esc to exit the program
     waitKey(0);
@@ -169,11 +170,8 @@ void normalizeAndCompare(vector<Mat> templates, vector<Mat> samples){
 
     for(size_t i = 0; i < templates.size(); i++){
         cout << names[i] << endl;
-        cvtColor(templates[i], tmp1, COLOR_BGR2GRAY);
         for(size_t j = 0; j < samples.size(); j++){
-            cvtColor(samples[j], tmp2, COLOR_BGR2GRAY);
-            result = (matchShapes(tmp1, tmp2, 1, 0.0));
-            imshow(to_string(j), samples[j]);
+            result = (matchShapes(templates[i], samples[j], 1, 0.0));
             cout << "Result " << j << ": " << result << endl;
         }
     }
