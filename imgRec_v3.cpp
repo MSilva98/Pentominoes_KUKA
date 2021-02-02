@@ -7,6 +7,8 @@ using namespace std;
 
 //g++ -ggdb imgRec_v3.cpp -o imgRec `pkg-config --cflags --libs opencv`
 
+void normalizeAndCompare(vector<Mat> templates, vector<Mat> samples);
+
 int main(){
 
     //Read input image in gray scale
@@ -18,7 +20,7 @@ int main(){
 
     Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat, image;
 
-    frame = imread("imgP.png", IMREAD_COLOR);
+    frame = imread("imgP2.png", IMREAD_COLOR);
 
 
     bitwise_xor(b,frame,diff_im);
@@ -62,9 +64,17 @@ int main(){
         approxPolyDP(contours[i], contours[i], epsilon, true);
     }
 
+    // Load Templates
+    vector<Mat> templates;
+    templates.push_back(imread("F.png", IMREAD_COLOR));
+    templates.push_back(imread("L.png", IMREAD_COLOR));
+    templates.push_back(imread("N.png", IMREAD_COLOR));
+    templates.push_back(imread("P.png", IMREAD_COLOR));
+    templates.push_back(imread("U.png", IMREAD_COLOR));
+    templates.push_back(imread("X.png", IMREAD_COLOR));
+    
     vector<Mat> res;
     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    
     for( size_t i = 0; i< contours.size(); i++ ){
         Mat t = Mat::zeros(thresholdedImage.size(), CV_8UC3);
         drawContours(t, contours, i, color, CV_FILLED);
@@ -72,23 +82,22 @@ int main(){
             circle(t, contours[i][j], 5, Scalar(255,255,255));
         }
         Rect roi = boundingRect(contours[i]);
-        roi.x = roi.x-10;
-        roi.y = roi.y-10;
-        roi.width = roi.width+20;
-        roi.height = roi.height+20;
+        roi.x = roi.x*0.99;
+        roi.y = roi.y*0.99;
+        roi.width = roi.width*1.1;
+        roi.height = roi.height*1.1;
         Mat f(t,roi);
+        resize(f,f,Size(600,600));
         res.push_back(f);
     }
 
     for( size_t i = 0; i< res.size(); i++ ){
-        string name = "contours " + to_string(i);
+        string name = "contours" + to_string(i) + ".png";
         imshow(name, res[i]);
+        // imwrite(name, res[i]);
     }
 
-
-
-
-
+    // normalizeAndCompare(templates, res);
 
     // // Draw contours.
     // for( size_t i = 0; i< contours.size(); i++ ){
@@ -141,9 +150,27 @@ int main(){
     //close all the opened windows
     destroyAllWindows();
 
-    imwrite("imgC2.jpg", output);
+    // imwrite("imgC2.jpg", output);
 
     return 0;
+}
+
+
+void normalizeAndCompare(vector<Mat> templates, vector<Mat> samples){
+    double result;
+    vector<String> names{"F", "L", "N", "P", "U", "X"};
+    Mat tmp1, tmp2;
+
+    for(size_t i = 0; i < templates.size(); i++){
+        cout << names[i] << endl;
+        cvtColor(templates[i], tmp1, COLOR_BGR2GRAY);
+        for(size_t j = 0; j < samples.size(); j++){
+            cvtColor(samples[j], tmp2, COLOR_BGR2GRAY);
+            result = (matchShapes(tmp1, tmp2, 1, 0.0));
+            imshow(to_string(j), samples[j]);
+            cout << "Result " << j << ": " << result << endl;
+        }
+    }
 }
 
 void correctVertices(vector<vector<Point>> inputArr, vector<vector<Point>> outputArr){
