@@ -327,6 +327,11 @@ namespace ec2
         image_geometry::PinholeCameraModel modelPT;
         getDataFromPT(color, depth, modelPT, true);   // format BGR
         
+        cv::Mat color2;
+        cv::cvtColor(color,color2, cv::COLOR_BGR2RGB);
+        cv::imwrite("color.png", color2);
+        // cv::imwrite("depth.png", depth);
+
         modelPT.rectifyImage(color,color,cv::INTER_LINEAR);
 
         cv::Point2d pixel;
@@ -356,73 +361,25 @@ namespace ec2
         // Transformation from PanTilt to Base
         Eigen::Affine3d tf;
         getTransformation("iiwa_base", modelPT.tfFrame(), tf);
-        // V tranform to Base -> VBase
-        Eigen::Vector3d VBase = tf*Eigen::Vector3d(ray.x, ray.y, ray.z);
 
         // PanTilt Camera position
         Eigen::Vector3d posCamPT = tf*Eigen::Vector3d(0.0,0.0,0.0);
+        // V tranform to Base -> VBase
+        Eigen::Vector3d VBase = tf*Eigen::Vector3d(ray.x, ray.y, ray.z)-posCamPT;
         cout << "Vector Base: " << VBase.transpose() << "\nPT pos: " << posCamPT.transpose() << endl;
 
         // Pentaminoes Z surface
-        uint32_t Zsuperficie = 0.85;
-        uint32_t scalar = (Zsuperficie-posCamPT.z())/VBase.z();    
+        double Zsuperficie = -0.082;
+        double scalar = (Zsuperficie-posCamPT.z())/VBase.z();    
         
         Eigen::Vector3d ptP5 = posCamPT + scalar*VBase;
 
         cout << "SCALAR: " << scalar << "\nP5: " << ptP5.transpose() << endl;
 
-        // lookAt(ptP5, 0, 0.2, false);
-
+        lookAt(ptP5, 0, 0.2, false);
 
         // lookAt(Eigen::Vector3d(0.555, -0.04, 0.0),0,0.2,false);
         // Get something close to [0.555479, -0.0419522, 0.120125]
-
-
-
-        // ----------------------
-        // CAMERA POSITION TEST |
-        // ----------------------
-        // Eigen::Vector3d v;
-        // bool ok;
-        // ok = getPositionToBasePT(v, true);
-        // if(ok){
-        //     cout << "PT To Base: " << v.transpose() << endl;
-        // }
-        // else {
-        //     ROS_WARN("Was not possible to obtain PT position");
-        // }
-
-        // ok = getPositionToBaseTCP(v, true);
-        // if(ok){
-        //     cout << "TCP To Base: " << v.transpose() << endl;
-        // }
-        // else {
-        //     ROS_WARN("Was not possible to obtain TCP position");
-        // }
-        
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
-
-        // ros::Duration(0.5).sleep();
-
-        // ok = getPositionToBasePT(v, true);
-        // if(ok){
-        //     cout << "PT To Base: " << v.transpose() << endl;
-        // }
-        // else {
-        //     ROS_WARN("Was not possible to obtain PT position");
-        // }
-
-        // ok = getPositionToBaseTCP(v, true);
-        // if(ok){
-        //     cout << "TCP To Base: " << v.transpose() << endl;
-        // }
-        // else {
-        //     ROS_WARN("Was not possible to obtain TCP position");
-        // }
-
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, 0.4), 0.4);
-
-
 
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0, 0.0, -0.4), 0.4);
         // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0 / 180.0 * M_PI, Eigen::Vector3d(0.0, 0.0, 1.0)), 0.4);
@@ -442,14 +399,13 @@ namespace ec2
 
         // ros::Duration(0.5).sleep();
 
-        // cv::Mat color, depth;
-        // image_geometry::PinholeCameraModel model;
+        image_geometry::PinholeCameraModel model;
 
-        // getDataFromTCP(color, depth, model, true);
+        getDataFromTCP(color, depth, model, true);
 
-        // cv::imshow("color", color);
-        // cv::imshow("depth", depth);
-        // cv::waitKey(0);
+        cv::imshow("color", color);
+        cv::imshow("depth", depth);
+        cv::waitKey(0);
     }
 
 } // namespace ec2
@@ -459,7 +415,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "solver");
     ec2::Solver solver("solver");
 
-    solver.setPT(0.7, -0.85);
+    solver.setPT(0.8, -0.8);
     solver.solve();
 
     ros::spin();
