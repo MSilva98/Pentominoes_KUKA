@@ -109,11 +109,8 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(solver src/solver.cpp)
+add_executable(solver src/solver.cpp src/pieceDetection.cpp)
 target_link_libraries(solver ${catkin_LIBRARIES})
-
-add_executable(solver_v2 src/solver_v2.cpp)
-target_link_libraries(solver_v2 ${catkin_LIBRARIES})
 
 #############
 ## Install ##

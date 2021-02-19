@@ -95,8 +95,6 @@ protected:
 
     bool getTCPModel(image_geometry::PinholeCameraModel &model, bool now);
     bool getPTModel(image_geometry::PinholeCameraModel &model, bool now);
-    void getPiecesAvgCenter(cv::Mat frame, cv::Point2d &center);
-    void getPiecesCenter(cv::Mat frame, std::vector<cv::Point2d> &center);
     void getBasePosFromPixel(cv::Point2d pixel, Eigen::Vector3d &pos, image_geometry::PinholeCameraModel model);
 
 
