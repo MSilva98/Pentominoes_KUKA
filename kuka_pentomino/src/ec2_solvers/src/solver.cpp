@@ -290,11 +290,11 @@ namespace ec2
 
     void Solver::getBasePosFromPixel(Point2d pixel, Eigen::Vector3d &pos, image_geometry::PinholeCameraModel model){
         double Z = -0.082;
-        cout << pixel << endl;
+        cout << "\nPixel: " << pixel << endl;
         // Convert 2d point to 3d ray passing in point P
         Point3d v;
         v = model.projectPixelTo3dRay(pixel);
-        cout << "3d Ray: " << v << endl;
+        // cout << "3d Ray: " << v << endl;
         // Transformation to Base
         Eigen::Affine3d tf;
         getTransformation("iiwa_base", model.tfFrame(), tf);
@@ -302,9 +302,10 @@ namespace ec2
         Eigen::Vector3d posCam = tf*Eigen::Vector3d(0.0,0.0,0.0);
         // V tranform to Base -> VBase
         Eigen::Vector3d VBase = tf*Eigen::Vector3d(v.x, v.y, v.z)-posCam;
-        cout << "Vector Base: " << VBase.transpose() << "\nCamera pos: " << posCam.transpose() << endl;
+        // cout << "Vector Base: " << VBase.transpose() << "\nCamera pos: " << posCam.transpose() << endl;
         double scalar = (Z-posCam.z())/VBase.z();    
         pos = posCam + scalar*VBase;
+        cout << "3d Point: " << pos.transpose() << endl;
     }
 
     void Solver::solve()
@@ -316,88 +317,90 @@ namespace ec2
         Mat color, depth;
         image_geometry::PinholeCameraModel modelPT, modelTCP;
         
-        vector<Eigen::Vector3d> pieces;
-        Eigen::Vector3d tmp, tmp2;
+        vector<Eigen::Vector3d> detectedPiecesPT, posP5;
+        Eigen::Vector3d tmp;
 
-        // Look for pieces in the right side of table
+        // Look for pieces in the right side of table with Pan Tilt Cam
         vector<Point2d> piecesCenterRight; 
         setPT(0.7, -0.8);
-        ros::Duration(0.5).sleep();
+        // Sleep 0.8 seconds
+        ros::Duration(0.8).sleep();
         getDataFromPT(color, depth, modelPT, true);   // format BGR
         cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-        // imwrite("rightPieces.png", color);
         pieceDetect.findPiecesPT(imread("templateRight.png", IMREAD_COLOR), color, piecesCenterRight, "right PT");
-        for(int i = 0; i < piecesCenterRight.size(); i++){
+        for(size_t i = 0; i < piecesCenterRight.size(); i++){
             getBasePosFromPixel(piecesCenterRight[i], tmp, modelPT);
-            pieces.push_back(tmp);
-        }
+            detectedPiecesPT.push_back(tmp);
+        }   
 
-        // Look for pieces in the left side of table
+        // Look for pieces in the left side of table with Pan Tilt Cam
         vector<Point2d> piecesCenterLeft; 
         setPT(1.5, -1.1);
-        ros::Duration(0.5).sleep();        
+        // Sleep 0.8 seconds
+        ros::Duration(0.8).sleep();        
         getDataFromPT(color, depth, modelPT, true);   // format BGR
         cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-        // imwrite("leftPieces.png", color);
         pieceDetect.findPiecesPT(imread("templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "left PT");
-        for(int i = 0; i < piecesCenterLeft.size(); i++){
+        for(size_t i = 0; i < piecesCenterLeft.size(); i++){
             getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
-            pieces.push_back(tmp);
+            detectedPiecesPT.push_back(tmp);
         }
 
-        // // Discard similar positions
-        // // for (int i = 0; i < pieces.size()-1; i++){
-        // //     tmp = pieces[i];
-        // //     for (int j = i+1; j < pieces.size(); j++){
-        // //         tmp2 = pieces[j];
-        //     // ================================ TODO =======================================
-        // //         // Compare if two points are similar or close, if so delete one
-        // //     }         
-        // // }
-        
-        string s;
-        for(int i=0; i<pieces.size(); i++){
-            pieces[i].z() = 0.2;
-            cout << pieces[i].transpose() << endl;
-            lookAt(pieces[i], M_PI, 0.2, true);
+        removeClosePoints(detectedPiecesPT);
+
+        double angle = 0;
+        bool ok = false;
+        string name;
+        for(size_t i = 0; i < detectedPiecesPT.size(); i++){
+            detectedPiecesPT[i].z() = 0.2;
+            cout << detectedPiecesPT[i].transpose() << endl;
+            // Correct this to define a better angle
+            // if(i < 2)
+            //     lookAt(detectedPiecesPT[i], M_PI, 0.2, true);
+            // else
+                lookAt(detectedPiecesPT[i], 0, 0.2, true);
+            // Sleep 1 second
             ros::Duration(1.0).sleep();
             getDataFromTCP(color, depth, modelTCP, true);
-            s = "top_image_" + to_string(i) + ".png";
-            imwrite(s, color);
+            name = "top_image_" + to_string(i) + ".png";
+            imwrite(name, color);
+
+            // Pieces detected from TOP VIEW
             vector<Point2d> piecesCenter;
             pieceDetect.getPiecesCenter(color, piecesCenter);
-            // Convert each point to the base frae     
-            vector<Eigen::Vector3d> posP5;
+            // Convert each point to the base frame and save it
             for (size_t i = 0; i < piecesCenter.size(); i++){
                 getBasePosFromPixel(piecesCenter[i], tmp, modelTCP);
-                // tmp.z() = 0.1;
+                tmp.z() = 0.1;
                 posP5.push_back(tmp);
-            }
-            double angle = 0;
-            bool ok = false;
-            // Send arm to position
-            for (size_t i = 0; i < posP5.size(); i++){
-                cout << posP5[i].transpose() << endl;
-                // lookAt rotation is counter clockwise
-                if(i == 0 || i == 1)
-                    lookAt(posP5[i], M_PI, 0.2, true);
-                else if(i==3)
-                    lookAt(posP5[i], -M_PI_2, 0.2, true);   
-                else
-                    lookAt(posP5[i], 0, 0.2, true);
-
-                ros::Duration(1.0).sleep();
-                getDataFromTCP(color, depth, modelTCP, true);
-                string name = "Piece"+to_string(i)+".png";
-                cvtColor(color, color, CV_BGR2RGB);
-                // imshow(name, color);
-                imwrite(name, color);
             }
         }
 
+        // Remove close points (points that belong to same piece)
+        removeClosePoints(posP5);
+        cout << "REMAINING POINTS: " << posP5.size() << endl;
+
+        // Send arm to position of each piece and capture it
+        for (size_t j = 0; j < posP5.size(); j++){
+            cout << posP5[j].transpose() << endl;
+            // lookAt rotation is counter clockwise
+            // if(j == 0 || j == 1)
+            //     lookAt(posP5[j], M_PI, 0.2, true);
+            // else if(j == 4)
+            //     lookAt(posP5[j], -M_PI_2, 0.2, true);
+            // else
+                lookAt(posP5[j], 0, 0.2, true);
+
+            ros::Duration(1.0).sleep();
+            getDataFromTCP(color, depth, modelTCP, true);
+            name = "Piece"+to_string(j)+".png";
+            cvtColor(color, color, CV_BGR2RGB);
+            // imshow(name, color);
+            imwrite(name, color);
+        }
 
         // =======================================
-        // =======================================
+        // ======== OLD APPROACH =================
         // =======================================
         
         // // Get middle point of pieces zone
@@ -456,6 +459,22 @@ namespace ec2
         // imwrite("piecesAvgCenter.png", color);        
         // waitKey(0);
 
+    }
+
+    void Solver::removeClosePoints(vector<Eigen::Vector3d> &posP5){
+        double d;
+        for(size_t i = 0; i < posP5.size(); i++){
+            for(size_t j = 0; j < posP5.size(); j++){
+                if(i!=j){
+                    d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
+                    cout << "dist: " << d << "\nI: " << posP5[i].transpose() << "\nJ: " << posP5[j].transpose() << endl;
+                    if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
+                        cout << "CLOSE POINTS\n" << posP5[i].transpose() << "\n" << posP5[j].transpose() << endl;
+                        posP5.erase(posP5.begin()+j);
+                    }    
+                }    
+            }
+        }
     }
 
 } // namespace ec2

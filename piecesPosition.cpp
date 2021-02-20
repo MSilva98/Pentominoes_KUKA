@@ -19,7 +19,7 @@ int main(){
 
     cvtColor(diff_im, diff_im, CV_BGR2GRAY);
     Canny(diff_im, image, 140, 255, 3);
-    imshow("canny", image);
+    // imshow("canny", image);
     morphologyEx(image, image, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
 
     // medianBlur(diff_im, blurredImage, 7);
@@ -72,10 +72,10 @@ int main(){
     Point2d center;
     double x,y;
     double minX = 99999, minY=99999, maxX=0, maxY=0;
-    cout << contours1.size() << endl;
+    // cout << contours1.size() << endl;
     // Draw contours.
     for (size_t i = 0; i < contours1.size(); i++){
-        if(contours1[i].size() > 150){
+        if(contours1[i].size() > 180){
             drawContours(output, contours1, i, Scalar(255,255,255), CV_FILLED);
             Rect br = boundingRect(contours1[i]);
             x = br.x+br.width/2;
