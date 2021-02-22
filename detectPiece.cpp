@@ -14,13 +14,15 @@ float distance(int x1, int y1, int x2, int y2) ;
 Mat translateImg(Mat &img, int offsetx, int offsety);
 Mat contoursToImg(vector<Point> contours, Mat output);
 
-void normalizeAndCompare2(vector<Point> sample, char &piece, double &angle, Point &pointPiece );
+void normalizeAndCompare2(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece, Mat sample_img );
+Point rotatePointOrigin(Point p, double ang);
 
 int main(){
 
     Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat, image;
 
-    image = imread("Piece1.png", IMREAD_GRAYSCALE);
+    image = imread("Piece0.png", IMREAD_GRAYSCALE);
+
 
     Mat kernel = Mat::ones(20,20, CV_32F);
 
@@ -53,7 +55,7 @@ int main(){
     //Output image to draw contours on
     Mat output;
     //output = Mat::zeros( thresholdedImage.size(), CV_8UC3 );
-    output = Mat::zeros( thresholdedImage.size(), CV_8UC3 );
+    output = Mat::zeros( image.size(), CV_8UC3 );
 
     RNG rng(12345);
     
@@ -75,7 +77,7 @@ int main(){
 
 
     // Draw contours.
-    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    Scalar color = Scalar( 255, 255, 255 );
     drawContours(output, contours, idx, color, CV_FILLED);
     for( int j = 0; j< contours[idx].size(); j++ ){
 	    Point pt = contours[idx][j];
@@ -85,20 +87,6 @@ int main(){
     double angle; 
     Point pointPiece;
 
-    normalizeAndCompare2(contours[idx], piece, angle , pointPiece);
-    cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
-
-    //waitKey(0);
-
-
-    //close all the opened windows
-    destroyAllWindows();
-
-    return 0;
-}
-
-
-void normalizeAndCompare2(vector<Point> sample, char &piece, double &angle, Point &pointPiece ){
     vector<Mat> templates;
     templates.push_back(imread("F.png", IMREAD_GRAYSCALE));
     templates.push_back(imread("V.png", IMREAD_GRAYSCALE));
@@ -107,34 +95,87 @@ void normalizeAndCompare2(vector<Point> sample, char &piece, double &angle, Poin
     templates.push_back(imread("U.png", IMREAD_GRAYSCALE));
     templates.push_back(imread("X.png", IMREAD_GRAYSCALE));
 
+
+    normalizeAndCompare2(templates, contours[idx], piece, angle , pointPiece, output);
+    cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
+
+
+    Point2f vtx[4];
+    RotatedRect box = minAreaRect(contours[idx]);
+    box.points(vtx);
+    for(int i = 0; i < 4; i++ ){
+        cout << vtx[i] << endl;
+        line(output, vtx[i], vtx[(i+1)%4], Scalar(255, 255, 0), 2, LINE_AA);
+    }
+    line(output, vtx[0], vtx[3], Scalar(255, 0, 255), 2, LINE_AA);
+    cout << box.center <<  " box center " << endl;
+    //pointPiece = box.center;
+
+    
+
+    output.at<Vec3b>(pointPiece.y, pointPiece.x)[0] = 255;
+    output.at<Vec3b>(pointPiece.y, pointPiece.x)[1] = 0;
+    output.at<Vec3b>(pointPiece.y, pointPiece.x)[2] = 255;
+    output.at<Vec3b>(pointPiece.y+1, pointPiece.x)[0] = 255;
+    output.at<Vec3b>(pointPiece.y+1, pointPiece.x)[1] = 0;
+    output.at<Vec3b>(pointPiece.y+1, pointPiece.x)[2] = 255;
+    output.at<Vec3b>(pointPiece.y-1, pointPiece.x)[0] = 255;
+    output.at<Vec3b>(pointPiece.y-1, pointPiece.x)[1] = 0;
+    output.at<Vec3b>(pointPiece.y-1, pointPiece.x)[2] = 255;
+
+    //imshow("output", output);  
+
+    imwrite("point.png", output);
+
+    //waitKey(0);
+    
+    waitKey(0);   
+
+    //close all the opened windows
+    destroyAllWindows();
+
+    return 0;
+}
+
+
+void normalizeAndCompare2(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece, Mat  sample_img){
+    
     vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
+
+    //default points to grab
+    vector<Point> point_grab;
+    point_grab.push_back(Point(0, 250));  // F 0 
+    point_grab.push_back(Point(30, 250));  // V 0
+    point_grab.push_back(Point(125, 115));   // N 90
+    point_grab.push_back(Point(-250, -125)); // P 90
+    point_grab.push_back(Point(0, 125));    // U 90
+    point_grab.push_back(Point(0, -250));   // X 0
 
     //Get vx, perimeter and minAreaRect - sample
     int vx = sample.size();
-    double xP = 0;
-    double yP = 0;
-    for (int i = 0; i < sample.size(); ++i)
-    {
-        xP = xP + sample[i].x;
-        yP = yP + sample[i].y;
-    }
-    pointPiece.x = xP / sample.size();
-    pointPiece.y = yP / sample.size();
-
     double perim = 0;
     for( int j = 0; j< sample.size() - 1; j++ ){
         Point pt1 = sample[j];
         Point pt2 = sample[j+1];
         perim = perim + distance(pt1.x, pt1.y, pt2.x, pt2.y);
     }
-
+    
     RotatedRect box = minAreaRect(sample);
     double area =  box.size.width * box.size.height;
 
+    pointPiece = box.center;
+
+    cout << pointPiece << " <- Point" << endl;
+
     double ang = box.angle;
+    //if (box.size.width < box.size.height*0.9) {
+    //  ang = ang + 90;
+    //}
 
     double angT = 0;
 
+
+    RotatedRect boxxx;
 
     int perimInt = 300;
     int areaInt = 37000;
@@ -149,10 +190,10 @@ void normalizeAndCompare2(vector<Point> sample, char &piece, double &angle, Poin
         //Find contours
         findContours(templates[i], contoursTemplate, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
         double epsilon;
-        for( size_t j = 0; j< contoursTemplate.size(); j++ ){
-            epsilon = 0.02*arcLength(contoursTemplate[j], true);
-            approxPolyDP(contoursTemplate[j], contoursTemplate[j], epsilon, true);
-        }
+        //for( size_t j = 0; j< contoursTemplate.size(); j++ ){
+            epsilon = 0.02*arcLength(contoursTemplate[0], true);
+            approxPolyDP(contoursTemplate[0], contoursTemplate[0], epsilon, true);
+        //}
         //Get vx, perimeter and minAreaRect
         int vxT = contoursTemplate[0].size();
 
@@ -164,22 +205,282 @@ void normalizeAndCompare2(vector<Point> sample, char &piece, double &angle, Poin
         }
         RotatedRect boxT = minAreaRect(contoursTemplate[0]);
         double areaT =  boxT.size.width * boxT.size.height;
+        cout << " vx - " << vx << " : " << vxT << " perim - " << perim << " : " << perimT << " area - " << area << " : " << areaT << endl;
         if(vx == vxT){
             if(perim > perimT - perimInt && perim < perimT + perimInt){
                 if(area > areaT - areaInt && area < areaT + areaInt){
                     idxPiece = i;
                     angT = boxT.angle;
+                    //if (boxT.size.width < boxT.size.height*0.9) {
+                    //  angT = angT - 90;
+                    //}
+                    boxxx = boxT;
                     break;
                 }
             }
         }
     }
-
-    angle = ang - angT;
+    cout << "ang " << idxPiece << endl;
+    angle = ang; // - angT;
     piece = names[idxPiece];
 
-    //cout << "RECOGNIZE PIECE  " << piece << " ang "<< angle << "point- "<< pointPiece << endl;
 
+    //calculate the right angle
+    int margin = 25; //
+    if(idxPiece == 0){ //F
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 1;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
+                || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
+                    if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
+                    || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
+                        points_by_side[i].push_back(sample[j]);
+                        cout << "-" << i << endl;
+                    }
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.60*(dist_vtx)){
+                    cout << "here" << i << endl;
+                    side = i;
+                }
+            }
+        }
+        cout << side << endl;
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 270;
+        }else if(side == 2){
+            angle = angle + 90;
+        }else if(side == 3){
+            angle = angle + 180;
+        }
+
+    }else if(idxPiece == 1){ //V
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
+                || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
+                    if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
+                    || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
+                        points_by_side[i].push_back(sample[j]);
+                        cout << "-" << i << endl;
+                    }
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size() - 1; ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts0 = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_pts1 = distance(points_by_side[i+1][0].x,points_by_side[i+1][0].y,points_by_side[i+1][1].x,points_by_side[i+1][1].y );
+                float dist_vtx0 = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                float dist_vtx1 = distance(vtxBox[i].x,vtxBox[(i+1)%4].y,vtxBox[(i+2)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts0 > 0.8*(dist_vtx0) && dist_pts1 > 0.8*(dist_vtx1)){
+                    cout << "here" << i << endl;
+                    side = i;
+                }
+            }
+        }
+        cout << side << endl;
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 2){ //N
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
+                || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
+                    if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
+                    || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
+                        points_by_side[i].push_back(sample[j]);
+                        cout << "-" << i << endl;
+                    }
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.60*(dist_vtx)){
+                    cout << "here" << i << endl;
+                    side = i;
+                }
+            }
+        }
+        cout << side << endl;
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 3){ //P
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
+                || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
+                    if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
+                    || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
+                        points_by_side[i].push_back(sample[j]);
+                        cout << "-" << i << endl;
+                    }
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.6*(dist_vtx) && dist_pts < 0.9*(dist_vtx)){
+                    cout << "here" << i << endl;
+                    side = i;
+                }
+            }
+        }
+        cout << side << endl;
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 4){ //U
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 1;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
+                || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
+                    if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
+                    || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
+                        points_by_side[i].push_back(sample[j]);
+                        cout << "-" << i << endl;
+                    }
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 4){
+                cout << "here" << i << endl;
+                side = i;
+            }
+        }
+        cout << side << endl;
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 270;
+        }else if(side == 2){
+            angle = angle + 90;
+        }else if(side == 3){
+            angle = angle + 180;
+        }
+    }
+    
+    Point point_rotate = rotatePointOrigin(point_grab[idxPiece], angle );
+    //Point point_rotate = point_grab[idxPiece];
+    pointPiece.y  = pointPiece.y  + point_rotate.y  ;
+    pointPiece.x  = pointPiece.x  + point_rotate.x  ;
+    
+
+    /*
+
+    Point2f vtx[4];
+    boxxx.points(vtx);
+    for(int i = 0; i < 4; i++ ){
+        line(templates[idxPiece], vtx[i], vtx[(i+1)%4], Scalar(255, 255, 0), 2, LINE_AA);
+    }
+
+    Point pp = boxxx.center;
+    pp.y = pp.y + point_grab[idxPiece].y;
+    pp.x = pp.x + point_grab[idxPiece].x;
+
+    Mat img_t = imread("U.png", IMREAD_COLOR);
+
+    img_t.at<Vec3b>(pp.y, pp.x) = Vec3b(255,0,255);
+
+    */
+
+    //imshow("temp", templates[1]);  
+    
+    //imwrite("pointT.png", img_t);
+    
+    
+
+     //line(img, Point(50,50), Point(600,600), Scalar(0, 255, 0), 5, LINE_AA);
+    //rectangle(img, vtx[0], vtx[2], Scalar(255, 255, 255), 5);
+    
+    //Point vectorGrab = rotatePointOrigin(grabN, angle);
+
+    
+
+    //cout << "RECOGNIZE PIECE  " << piece << " ang "<< angle << "point- "<< pointPiece << endl;
+    cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
+
+}
+
+Point rotatePointOrigin(Point p, double ang){
+    Point p_rotate;
+    double m_PI = 3.14159265359; 
+    p_rotate.x = p.x * cos(ang * (m_PI/ 180)) - p.y * sin(ang* (m_PI/ 180));
+    p_rotate.y = p.y * cos(ang * (m_PI/ 180)) + p.x * sin(ang* (m_PI/ 180));
+    return p_rotate;
 }
 
 
