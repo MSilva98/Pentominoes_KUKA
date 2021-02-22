@@ -11,6 +11,7 @@ namespace ec2{
         // void getPiecesAvgCenter(cv::Mat frame, cv::Point2d &center);
         void findPiecesPT(cv::Mat templ, cv::Mat frame, std::vector<cv::Point2d> &center, std::string name);
         void getPiecesCenter(cv::Mat frame, std::vector<cv::Point2d> &center);
+        void findPlayframe(cv::Mat image, cv::Point2d &innerCorner);
         cv::Mat rotate(cv::Mat src, double angle);
         float distance(int x1, int y1, int x2, int y2) ;
         cv::Mat translateImg(cv::Mat &img, int offsetx, int offsety);

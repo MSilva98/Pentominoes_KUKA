@@ -155,11 +155,64 @@ namespace ec2{
 
         // imshow("CANNY", thresholdImage);
         // imshow("MORPHOLOGY", frame);
-        imshow("OUT", output);
+        imshow("GET PIECES CENTER", output);
         waitKey(0);
         destroyAllWindows();
     }
 
+    void pieceDetection::findPlayframe(Mat image, Point2d &innerCorner){
+        Mat thresholdImage, output = Mat::zeros(image.size(),CV_8UC3);
+        medianBlur(image,image,7);
+        Canny(image, thresholdImage, 255, 255, 3);
+        morphologyEx(thresholdImage, image, MORPH_CLOSE, Mat::ones(8,8, CV_32F));
+
+        //To store contours
+        vector<vector<Point>> contours, contours2;
+        //To store hierarchy(nestedness)
+        vector<Vec4i> hierarchy;
+        //Find contours
+        //findContours(thresholdedImage, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        findContours(image, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+        double epsilon;
+        vector<Point> tmp;
+        for( size_t i = 0; i < contours.size(); i++ ){
+            epsilon = 0.01*arcLength(contours[i], true);
+            approxPolyDP(contours[i], tmp, epsilon, true);
+            contours2.push_back(tmp);
+        }
+
+        double d, d1, x, y;
+        for( size_t i = 0; i < contours2.size(); i++ ){
+            if(arcLength(contours2[i], true) > 400){
+                drawContours(output, contours2, i, Scalar(255,255,255), CV_FILLED);
+                Rect br = boundingRect(contours2[i]);
+                x = (br.x+br.width/2);
+                y = (br.y+br.height/2);
+                innerCorner = contours2[i][0];
+                d1 = sqrt(pow(innerCorner.x-x,2)+pow(innerCorner.y-y,2));
+                for (int j = 1; j < contours2[i].size(); ++j){
+                    d = sqrt(pow(contours2[i][j].x-x,2)+pow(contours2[i][j].y-y,2));
+                    if(d < d1){
+                        d1 = d;
+                        innerCorner = contours2[i][j];
+                    }
+                }
+                output.at<Vec3b>(innerCorner.y, innerCorner.x) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y+1, innerCorner.x-1) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y-1, innerCorner.x+1) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y+1, innerCorner.x+1) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y-1, innerCorner.x-1) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y+1, innerCorner.x) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y-1, innerCorner.x) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y, innerCorner.x+1) = Vec3b(0,0,255);
+                output.at<Vec3b>(innerCorner.y, innerCorner.x-1) = Vec3b(0,0,255);
+            }
+        }
+        imshow("PLAY FRAME", output);
+        waitKey(0);
+        destroyAllWindows();
+    }
 
     vector<Point> pieceDetection::imagePieceToContours(Mat image, Mat &output){
         Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat;

@@ -9,7 +9,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv/cv.hpp>
 #include <opencv2/imgproc.hpp>
-
+#include <tuple>
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -318,9 +318,10 @@ namespace ec2
         image_geometry::PinholeCameraModel modelPT, modelTCP;
         
         vector<Eigen::Vector3d> detectedPiecesPT, posP5;
-        Eigen::Vector3d tmp;
+        Eigen::Vector3d tmp, playFramePos;
 
         // Look for pieces in the right side of table with Pan Tilt Cam
+        ROS_INFO("Searching pieces on the right side of table...");
         vector<Point2d> piecesCenterRight; 
         setPT(0.7, -0.8);
         // Sleep 0.8 seconds
@@ -333,37 +334,47 @@ namespace ec2
             detectedPiecesPT.push_back(tmp);
         }   
 
-        // Look for pieces in the left side of table with Pan Tilt Cam
-        vector<Point2d> piecesCenterLeft; 
-        setPT(1.5, -1.1);
-        // Sleep 0.8 seconds
-        ros::Duration(0.8).sleep();        
-        getDataFromPT(color, depth, modelPT, true);   // format BGR
-        cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-        pieceDetect.findPiecesPT(imread("templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "left PT");
-        for(size_t i = 0; i < piecesCenterLeft.size(); i++){
-            getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
-            detectedPiecesPT.push_back(tmp);
+        ROS_INFO("Searching for inner corner of play area frame...");
+        // Detect inner corner from play area frame
+        Point2d innerCorner;
+        pieceDetect.findPlayframe(color, innerCorner);
+        getBasePosFromPixel(innerCorner, playFramePos, modelPT);
+
+        // Only check left side of table if less than 6 points detected
+        if(detectedPiecesPT.size() < 6){
+            ROS_INFO("Searching pieces on the left side of table...");
+            // Look for pieces in the left side of table with Pan Tilt Cam
+            vector<Point2d> piecesCenterLeft; 
+            setPT(1.5, -1.1);
+            // Sleep 0.8 seconds
+            ros::Duration(0.8).sleep();        
+            getDataFromPT(color, depth, modelPT, true);   // format BGR
+            cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
+            pieceDetect.findPiecesPT(imread("templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "left PT");
+            for(size_t i = 0; i < piecesCenterLeft.size(); i++){
+                getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
+                detectedPiecesPT.push_back(tmp);
+            }
         }
-
+        // Remove close points (points that belong to same piece)
+        // Prevents unnecessary visits to pieces
         removeClosePoints(detectedPiecesPT);
-
-        double angle = 0;
-        bool ok = false;
+        
+        ROS_INFO("Getting mid-point for each piece...");
         string name;
         for(size_t i = 0; i < detectedPiecesPT.size(); i++){
             detectedPiecesPT[i].z() = 0.2;
             cout << detectedPiecesPT[i].transpose() << endl;
             // Correct this to define a better angle
-            // if(i < 2)
-            //     lookAt(detectedPiecesPT[i], M_PI, 0.2, true);
-            // else
+            if(i < 2)
+                lookAt(detectedPiecesPT[i], M_PI, 0.2, true);
+            else
                 lookAt(detectedPiecesPT[i], 0, 0.2, true);
             // Sleep 1 second
             ros::Duration(1.0).sleep();
             getDataFromTCP(color, depth, modelTCP, true);
             name = "top_image_" + to_string(i) + ".png";
-            imwrite(name, color);
+            imshow(name, color);
 
             // Pieces detected from TOP VIEW
             vector<Point2d> piecesCenter;
@@ -380,108 +391,49 @@ namespace ec2
         removeClosePoints(posP5);
         cout << "REMAINING POINTS: " << posP5.size() << endl;
 
+        ROS_INFO("Reading and recognizing each piece individually and its grasp point...");
+        vector<Mat> templates{
+            imread("templates/F.png", IMREAD_GRAYSCALE),
+            imread("templates/V.png", IMREAD_GRAYSCALE),
+            imread("templates/N.png", IMREAD_GRAYSCALE),
+            imread("templates/P.png", IMREAD_GRAYSCALE),
+            imread("templates/U.png", IMREAD_GRAYSCALE),
+            imread("templates/X.png", IMREAD_GRAYSCALE)
+        };
+        char piece; 
+        double angle; 
+        Point pointPiece;
+        Mat output;
+        vector<Point> contours_image;
+        vector<tuple<char, double, Eigen::Vector3d>> grabPos;        
         // Send arm to position of each piece and capture it
         for (size_t j = 0; j < posP5.size(); j++){
             cout << posP5[j].transpose() << endl;
             // lookAt rotation is counter clockwise
-            // if(j == 0 || j == 1)
-            //     lookAt(posP5[j], M_PI, 0.2, true);
+            if(j == 0 || j == 1)
+                lookAt(posP5[j], M_PI, 0.2, true);
             // else if(j == 4)
             //     lookAt(posP5[j], -M_PI_2, 0.2, true);
-            // else
+            else
                 lookAt(posP5[j], 0, 0.2, true);
 
             ros::Duration(1.0).sleep();
             getDataFromTCP(color, depth, modelTCP, true);
             name = "Piece"+to_string(j)+".png";
             cvtColor(color, color, CV_BGR2RGB);
-            // imshow(name, color);
-            imwrite(name, color);
+            imshow(name, color);
+            // imwrite(name, color);
 
             cout << "Categorize Pieces" << endl;
-
-            char piece; 
-            double angle; 
-            Point pointPiece;
-
-            vector<Mat> templates;
-            templates.push_back(imread("F.png", IMREAD_GRAYSCALE));
-            templates.push_back(imread("V.png", IMREAD_GRAYSCALE));
-            templates.push_back(imread("N.png", IMREAD_GRAYSCALE));
-            templates.push_back(imread("P.png", IMREAD_GRAYSCALE));
-            templates.push_back(imread("U.png", IMREAD_GRAYSCALE));
-            templates.push_back(imread("X.png", IMREAD_GRAYSCALE));
-
-            Mat output;
-
-            vector<Point> contours_image = pieceDetect.imagePieceToContours(color, output);
+            contours_image = pieceDetect.imagePieceToContours(color, output);
             pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
             cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
-
+            getBasePosFromPixel(pointPiece, tmp, modelTCP);
+            grabPos.push_back(make_tuple(piece, angle, tmp));
         }
-
-
-
-        // =======================================
-        // ======== OLD APPROACH =================
-        // =======================================
-        
-        // // Get middle point of pieces zone
-        // Point2d center;
-        // pcDt.getPiecesAvgCenter(color, center);
-        // cout << center << endl;
-
-        // // Convert the point to the base frame
-        // Eigen::Vector3d avgPosP5;
-        // getBasePosFromPixel(center, avgPosP5, modelPT);
-        // avgPosP5.z() = 0.5;       // Define z higher to see the whole pieces
-        // cout << avgPosP5.transpose() << endl;
-        // lookAt(avgPosP5, 0, 0.2, true);
-        // ros::Duration(1.0).sleep();
-        // getDataFromTCP(color, depth, modelTCP, true);
-        // imwrite("top_image.png", color);
-
-        // // Get middle point of EACH piece
-        // vector<Point2d> piecesCenter;
-        // pcDt.getPiecesCenter(color, piecesCenter);
-        // cout << piecesCenter << endl;  
-
-        // // Convert each point to the base frae     
-        // vector<Eigen::Vector3d> posP5;
-        // Eigen::Vector3d tmp;
-        // for (size_t i = 0; i < piecesCenter.size(); i++){
-        //     getBasePosFromPixel(piecesCenter[i], tmp, modelTCP);
-        //     // tmp.z() = 0.1;
-        //     posP5.push_back(tmp);
-        // }
-        // double angle = 0;
-        // bool ok = false;
-        // // Send arm to position
-        // for (size_t i = 0; i < posP5.size(); i++){
-        //     cout << posP5[i].transpose() << endl;
-        //     // lookAt rotation is counter clockwise
-        //     if(i == 0 || i == 1)
-        //         lookAt(posP5[i], M_PI, 0.2, true);
-        //     else if(i==3)
-        //         lookAt(posP5[i], -M_PI_2, 0.2, true);   
-        //     else
-        //         lookAt(posP5[i], 0, 0.2, true);
-
-        //     ros::Duration(1.0).sleep();
-        //     getDataFromTCP(color, depth, modelTCP, true);
-        //     string name = "Piece"+to_string(i)+".png";
-        //     cvtColor(color, color, CV_BGR2RGB);
-        //     imshow(name, color);
-        //     // imwrite(name, color);
-        // }
-
-        // waitKey(0);
-        // destroyAllWindows();
-
-        // imshow("Center", color);
-        // imwrite("piecesAvgCenter.png", color);        
-        // waitKey(0);
-
+        // Show all top images
+        waitKey(0);
+        destroyAllWindows();
     }
 
     void Solver::removeClosePoints(vector<Eigen::Vector3d> &posP5){

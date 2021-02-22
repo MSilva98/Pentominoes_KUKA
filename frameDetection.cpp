@@ -94,6 +94,10 @@ void getPiecesCenter(Mat &frame, Mat &thresholdImage, Mat &output, int run){
         }
     }
 
+    // 6 cubes vertical     -> (6*.34)-0.01 = 2.03
+    // 5 cubes horizontal   -> (5*.34)-0.01 = 1.69
+
+
     // imshow("CANNY", thresholdImage);
     // imshow("Frame", frame);
     // imshow("OUT", output);
