@@ -109,6 +109,7 @@ namespace ec2{
             }
         }
         imshow(name, output);
+        imwrite("tempImages/"+name+".png", output);
         waitKey(0);
         destroyAllWindows();
     }
@@ -210,6 +211,7 @@ namespace ec2{
             }
         }
         imshow("PLAY FRAME", output);
+        imwrite("tempImages/PLAYFRAME.png", output);
         waitKey(0);
         destroyAllWindows();
     }

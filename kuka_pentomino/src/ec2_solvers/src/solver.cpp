@@ -328,7 +328,7 @@ namespace ec2
         ros::Duration(0.8).sleep();
         getDataFromPT(color, depth, modelPT, true);   // format BGR
         cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-        pieceDetect.findPiecesPT(imread("templateRight.png", IMREAD_COLOR), color, piecesCenterRight, "right PT");
+        pieceDetect.findPiecesPT(imread("templates/templateRight.png", IMREAD_COLOR), color, piecesCenterRight, "right PT");
         for(size_t i = 0; i < piecesCenterRight.size(); i++){
             getBasePosFromPixel(piecesCenterRight[i], tmp, modelPT);
             detectedPiecesPT.push_back(tmp);
@@ -350,7 +350,7 @@ namespace ec2
             ros::Duration(0.8).sleep();        
             getDataFromPT(color, depth, modelPT, true);   // format BGR
             cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-            pieceDetect.findPiecesPT(imread("templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "left PT");
+            pieceDetect.findPiecesPT(imread("templates/templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "left PT");
             for(size_t i = 0; i < piecesCenterLeft.size(); i++){
                 getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
                 detectedPiecesPT.push_back(tmp);
@@ -373,8 +373,9 @@ namespace ec2
             // Sleep 1 second
             ros::Duration(1.0).sleep();
             getDataFromTCP(color, depth, modelTCP, true);
-            name = "top_image_" + to_string(i) + ".png";
+            name = "tempImages/top_image_" + to_string(i) + ".png";
             imshow(name, color);
+            imwrite(name, color);
 
             // Pieces detected from TOP VIEW
             vector<Point2d> piecesCenter;
@@ -419,10 +420,10 @@ namespace ec2
 
             ros::Duration(1.0).sleep();
             getDataFromTCP(color, depth, modelTCP, true);
-            name = "Piece"+to_string(j)+".png";
+            name = "tempImages/Piece"+to_string(j)+".png";
             cvtColor(color, color, CV_BGR2RGB);
             imshow(name, color);
-            // imwrite(name, color);
+            imwrite(name, color);
 
             cout << "Categorize Pieces" << endl;
             contours_image = pieceDetect.imagePieceToContours(color, output);
