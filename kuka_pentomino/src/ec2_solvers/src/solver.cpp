@@ -371,7 +371,7 @@ namespace ec2
             // Convert each point to the base frame and save it
             for (size_t i = 0; i < piecesCenter.size(); i++){
                 getBasePosFromPixel(piecesCenter[i], tmp, modelTCP);
-                tmp.z() = 0.1;
+                tmp.z() = 0.05;
                 posP5.push_back(tmp);
             }
         }
@@ -397,7 +397,30 @@ namespace ec2
             cvtColor(color, color, CV_BGR2RGB);
             // imshow(name, color);
             imwrite(name, color);
+
+            cout << "Categorize Pieces" << endl;
+
+            char piece; 
+            double angle; 
+            Point pointPiece;
+
+            vector<Mat> templates;
+            templates.push_back(imread("F.png", IMREAD_GRAYSCALE));
+            templates.push_back(imread("V.png", IMREAD_GRAYSCALE));
+            templates.push_back(imread("N.png", IMREAD_GRAYSCALE));
+            templates.push_back(imread("P.png", IMREAD_GRAYSCALE));
+            templates.push_back(imread("U.png", IMREAD_GRAYSCALE));
+            templates.push_back(imread("X.png", IMREAD_GRAYSCALE));
+
+            Mat output;
+
+            vector<Point> contours_image = pieceDetect.imagePieceToContours(color, output);
+            pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
+            cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
+
         }
+
+
 
         // =======================================
         // ======== OLD APPROACH =================
