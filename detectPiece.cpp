@@ -20,7 +20,7 @@ vector<Point> imagePieceToContours(Mat image, Mat &output);
 int main(){
 
     Mat image;
-    image = imread("Piece4.png", IMREAD_COLOR);
+    image = imread("Piece5.png", IMREAD_COLOR);
     Mat imageGray;
     cvtColor(image, imageGray, COLOR_BGR2GRAY);
 
@@ -168,6 +168,7 @@ vector<Point> imagePieceToContours(Mat image, Mat &output){
 void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
     
     vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
+    vector<double> angleToGrabTemp{0, 0, 90, 90, 90, 0};
 
     //default points to grab
     vector<Point> point_grab;
@@ -229,7 +230,7 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
         }
         RotatedRect boxT = minAreaRect(contoursTemplate[0]);
         double areaT =  boxT.size.width * boxT.size.height;
-        cout << " vx - " << vx << " : " << vxT << " perim - " << perim << " : " << perimT << " area - " << area << " : " << areaT << endl;
+        //cout << " vx - " << vx << " : " << vxT << " perim - " << perim << " : " << perimT << " area - " << area << " : " << areaT << endl;
         if(vx == vxT){
             if(perim > perimT - perimInt && perim < perimT + perimInt){
                 if(area > areaT - areaInt && area < areaT + areaInt){
@@ -263,7 +264,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                     if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
                     || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
                         points_by_side[i].push_back(sample[j]);
-                        cout << "-" << i << endl;
                     }
                 }
             }
@@ -275,7 +275,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                 float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
                 float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
                 if( dist_pts > 0.60*(dist_vtx)){
-                    cout << "here" << i << endl;
                     side = i;
                 }
             }
@@ -305,7 +304,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                     if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
                     || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
                         points_by_side[i].push_back(sample[j]);
-                        cout << "-" << i << endl;
                     }
                 }
             }
@@ -319,7 +317,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                 float dist_vtx0 = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
                 float dist_vtx1 = distance(vtxBox[i].x,vtxBox[(i+1)%4].y,vtxBox[(i+2)%4].x,vtxBox[(i+1)%4].y );
                 if( dist_pts0 > 0.8*(dist_vtx0) && dist_pts1 > 0.8*(dist_vtx1)){
-                    cout << "here" << i << endl;
                     side = i;
                 }
             }
@@ -348,7 +345,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                     if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
                     || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
                         points_by_side[i].push_back(sample[j]);
-                        cout << "-" << i << endl;
                     }
                 }
             }
@@ -360,7 +356,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                 float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
                 float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
                 if( dist_pts > 0.60*(dist_vtx)){
-                    cout << "here" << i << endl;
                     side = i;
                 }
             }
@@ -389,7 +384,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                     if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
                     || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
                         points_by_side[i].push_back(sample[j]);
-                        cout << "-" << i << endl;
                     }
                 }
             }
@@ -401,7 +395,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                 float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
                 float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
                 if( dist_pts > 0.6*(dist_vtx) && dist_pts < 0.9*(dist_vtx)){
-                    cout << "here" << i << endl;
                     side = i;
                 }
             }
@@ -430,7 +423,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
                     if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
                     || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
                         points_by_side[i].push_back(sample[j]);
-                        cout << "-" << i << endl;
                     }
                 }
             }
@@ -439,7 +431,6 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
         for (int i = 0; i < points_by_side.size(); ++i)
         {
             if(points_by_side[i].size() == 4){
-                cout << "here" << i << endl;
                 side = i;
             }
         }
@@ -455,11 +446,13 @@ void categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piec
     }else if(idxPiece == 5){ //X
         angle = ang - angT;
     }
+
     
     Point point_rotate = rotatePointOrigin(point_grab[idxPiece], angle );
     pointPiece.y  = pointPiece.y  + point_rotate.y  ;
     pointPiece.x  = pointPiece.x  + point_rotate.x  ;
     
+    angle = angle + angleToGrabTemp[idxPiece];
 
     
 }
