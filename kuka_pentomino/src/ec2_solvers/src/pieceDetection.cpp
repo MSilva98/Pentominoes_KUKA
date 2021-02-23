@@ -110,8 +110,8 @@ namespace ec2{
         }
         imshow(name, output);
         imwrite("tempImages/"+name+".png", output);
-        waitKey(0);
-        destroyAllWindows();
+        // waitKey(0);
+        // destroyAllWindows();
     }
 
     void pieceDetection::getPiecesCenter(Mat frame, vector<Point2d> &piecesCenter){
@@ -157,8 +157,8 @@ namespace ec2{
         // imshow("CANNY", thresholdImage);
         // imshow("MORPHOLOGY", frame);
         imshow("GET PIECES CENTER", output);
-        waitKey(0);
-        destroyAllWindows();
+        // waitKey(0);
+        // destroyAllWindows();
     }
 
     void pieceDetection::findPlayframe(Mat image, Point2d &innerCorner){
@@ -212,8 +212,8 @@ namespace ec2{
         }
         imshow("PLAY FRAME", output);
         imwrite("tempImages/PLAYFRAME.png", output);
-        waitKey(0);
-        destroyAllWindows();
+        // waitKey(0);
+        // destroyAllWindows();
     }
 
     vector<Point> pieceDetection::imagePieceToContours(Mat image, Mat &output){
@@ -562,9 +562,9 @@ namespace ec2{
 
     Point pieceDetection::rotatePointOrigin(Point p, double ang){
         Point p_rotate;
-        double m_PI = 3.14159265359; 
-        p_rotate.x = p.x * cos(ang * (m_PI/ 180)) - p.y * sin(ang* (m_PI/ 180));
-        p_rotate.y = p.y * cos(ang * (m_PI/ 180)) + p.x * sin(ang* (m_PI/ 180));
+        // double m_PI = 3.14159265359; 
+        p_rotate.x = p.x * cos(ang * (M_PI/ 180)) - p.y * sin(ang* (M_PI/ 180));
+        p_rotate.y = p.y * cos(ang * (M_PI/ 180)) + p.x * sin(ang* (M_PI/ 180));
         return p_rotate;
     }
 

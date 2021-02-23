@@ -97,6 +97,7 @@ protected:
     bool getPTModel(image_geometry::PinholeCameraModel &model, bool now);
     void getBasePosFromPixel(cv::Point2d pixel, Eigen::Vector3d &pos, image_geometry::PinholeCameraModel model);
     void removeClosePoints(std::vector<Eigen::Vector3d> &posP5);
+    bool setGrasp(const Eigen::Vector3d& position, double yaw, double velocity, bool blocking = true);
 
     void info(const char* fmt, ...);
     void warn(const char* fmt, ...);

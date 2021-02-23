@@ -18,6 +18,8 @@
 
 #include <angles/angles.h>
 
+#include <iostream>
+
 namespace ec2 {
 
 using namespace euroc_ros_msgs;
@@ -168,7 +170,7 @@ bool ArmInterface::moveRelativeTCPImpedance(const Eigen::Affine3d& pose,
 bool ArmInterface::setTCPPose(const Eigen::Affine3d& pose, double velocity, bool blocking)
 {
     /* Calculate the inverse kinematics. */
-
+    
     // this is so uncool
     euroc_ros_msgs::JointStateConstPtr js_msg = ros::topic::waitForMessage<euroc_ros_msgs::JointState>("/miiwa/joint_state",
                                                 ros::Duration(5));
@@ -200,7 +202,11 @@ bool ArmInterface::setTCPPose(const Eigen::Affine3d& pose, double velocity, bool
         ROS_ERROR("ArmInterface: %s", gik.response.error_message.c_str());
         return false;
     }
-
+    
+    if(gik.response.joint_position.values.size() <= 0){
+        ROS_ERROR("ArmInterface: Joint Position Values Vector size: %d", gik.response.joint_position.values.size());
+        return false;
+    }
     /* Now move the arm */
     // adjust the gripper offset directly in the joint
     gik.response.joint_position.values[6] -= M_PI*0.25;
