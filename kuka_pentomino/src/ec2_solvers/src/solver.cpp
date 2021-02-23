@@ -383,7 +383,7 @@ namespace ec2
             // Convert each point to the base frame and save it
             for (size_t i = 0; i < piecesCenter.size(); i++){
                 getBasePosFromPixel(piecesCenter[i], tmp, modelTCP);
-                tmp.z() = 0.05;
+                tmp.z() = 0.07; //0.035
                 posP5.push_back(tmp);
             }
         }
@@ -427,8 +427,16 @@ namespace ec2
 
             cout << "Categorize Pieces" << endl;
             contours_image = pieceDetect.imagePieceToContours(color, output);
-            pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
-            cout << "RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
+            bool status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
+            double current_yaw = 0.2;
+            //rotate robot until recognize the piece
+            // while(!status){
+            //     current_yaw = current_yaw + M_PI/5;
+            //     lookAt(posP5[j], 0, current_yaw, true);
+            //     contours_image = pieceDetect.imagePieceToContours(color, output);
+            //     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
+            // }
+            cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
             getBasePosFromPixel(pointPiece, tmp, modelTCP);
             grabPos.push_back(make_tuple(piece, angle, tmp));
         }

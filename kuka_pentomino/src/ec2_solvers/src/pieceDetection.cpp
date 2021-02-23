@@ -253,14 +253,10 @@ namespace ec2{
         int idx = 0;
         for (int i = 0; i < contours.size(); ++i)
         {
-            int perim = 0;
-            for( int j = 0; j< contours[i].size() - 1; j++ ){
-                Point pt1 = contours[i][j];
-                Point pt2 = contours[i][j+1];
-                perim = perim + distance(pt1.x, pt1.y, pt2.x, pt2.y);
-            }
-            if (perim > max){
-                max = perim;
+            RotatedRect box = minAreaRect(contours[i]);
+            double area =  box.size.width * box.size.height;
+            if (area > max){
+                max = area;
                 idx = i;
             }
         }
@@ -277,19 +273,19 @@ namespace ec2{
     }
 
 
-    void pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
+    bool pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
         
         vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
         vector<double> angleToGrabTemp{0, 0, 90, 90, 90, 0};
 
         //default points to grab
         vector<Point> point_grab;
-        point_grab.push_back(Point(0, 250));  // F 0 
-        point_grab.push_back(Point(30, 250));  // V 0
-        point_grab.push_back(Point(125, 115));   // N 90
-        point_grab.push_back(Point(-250, -125)); // P 90
-        point_grab.push_back(Point(0, 125));    // U 90
-        point_grab.push_back(Point(0, -250));   // X 0
+        point_grab.push_back(Point(-10, 200));  // F 0 
+        point_grab.push_back(Point(5, 200));  // V 0
+        point_grab.push_back(Point(105, 105));   // N 90
+        point_grab.push_back(Point(-200, -100)); // P 90
+        point_grab.push_back(Point(0, 115));    // U 90
+        point_grab.push_back(Point(0, -200));   // X 0
 
         //Get vx, perimeter and minAreaRect - sample
         int vx = sample.size();
@@ -349,6 +345,11 @@ namespace ec2{
                 }
             }
         }
+
+        if(idxPiece == -1){
+            return false;
+        }
+
         angle = ang; // - angT;
         piece = names[idxPiece];
 
@@ -555,6 +556,7 @@ namespace ec2{
         
         angle = angle + angleToGrabTemp[idxPiece];
 
+        return true;
         
     }
 

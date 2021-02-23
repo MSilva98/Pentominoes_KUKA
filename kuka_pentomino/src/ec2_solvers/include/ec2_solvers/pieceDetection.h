@@ -16,7 +16,7 @@ namespace ec2{
         float distance(int x1, int y1, int x2, int y2) ;
         cv::Mat translateImg(cv::Mat &img, int offsetx, int offsety);
         cv::Mat contoursToImg(std::vector<cv::Point> contours, cv::Mat output);
-        void categorizeAndDetect(std::vector<cv::Mat> templates, std::vector<cv::Point> sample, char &piece, double &angle, cv::Point &pointPiece);
+        bool categorizeAndDetect(std::vector<cv::Mat> templates, std::vector<cv::Point> sample, char &piece, double &angle, cv::Point &pointPiece);
         cv::Point rotatePointOrigin(cv::Point p, double ang);
         std::vector<cv::Point> imagePieceToContours(cv::Mat image, cv::Mat &output);
     };
