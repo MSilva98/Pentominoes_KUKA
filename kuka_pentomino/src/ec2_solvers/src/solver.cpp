@@ -467,7 +467,6 @@ namespace ec2
         char piece; 
         double angle; 
         Point pointPiece;
-        // Mat output;
         vector<Point> contours_image;
         vector<tuple<char, double, Eigen::Vector3d>> grabPos;        
         // Send arm to position of each piece and capture it
@@ -525,30 +524,22 @@ namespace ec2
                 if(get<0>(solution[i]) == get<0>(grabPos[j])){
                     cout << "Grab Piece: " << get<0>(grabPos[j]) << " at angle: " << get<1>(grabPos[j]) << " and pos: " << get<2>(grabPos[j]).transpose() << endl;
                     tmp = get<2>(grabPos[j]);
-                    // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
                     setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
                     grabPiece(0.02, 0.1, 120);
                 }
             }
                     
-            // send to final position HERE
-            cout << "Sol: " << get<1>(solution[i]) << ", " << get<2>(solution[i]) << endl;
-            // double x_final_pos_puzzle = (get<2>(solution[i]) *0.036);
-            // double y_final_pos_puzzle = -(get<1>(solution[i]) *0.036);
-            double x_final_pos_puzzle = -(get<1>(solution[i])*0.035)+0.050/2;
-            double y_final_pos_puzzle = -(get<2>(solution[i])*0.035)-0.010/2;
-            cout << "X: " << x_final_pos_puzzle << " Y: " << y_final_pos_puzzle << endl;
-            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.1);
+            double x_final_pos_puzzle = -(get<1>(solution[i])*0.035)+0.005;
+            double y_final_pos_puzzle = -(get<2>(solution[i])*0.035)-0.025;
+            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.17);
             angle = (360-get<3>(solution[i]))*(M_PI/180);
             cout << "Piece solution: " << get<0>(solution[i]) << " at angle: " << angle << " and pos: " <<  piece_final_pos.transpose() << endl;
-            setGripper(piece_final_pos, angle, 0.2 );
+            setGripper(piece_final_pos, angle, 0.2);
             cout << "Drop piece"<< endl;
-            releasePiece();
+            releasePiece(0.01, 0.1, 80);
         }
         
-        // Show all images
-        // waitKey(0);
-        // destroyAllWindows();
+        ROS_INFO("Pentominoes Puzzle Finished");
     }
 
 } // namespace ec2

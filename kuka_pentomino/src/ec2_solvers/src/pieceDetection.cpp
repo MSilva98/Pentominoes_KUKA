@@ -110,7 +110,6 @@ namespace ec2{
             }
         }
         imwrite("tempImages/"+name+".png", output);
-        imwrite("tempImages/"+name+"_canny.png", image);
         // waitKey(0);
         // destroyAllWindows();
     }
