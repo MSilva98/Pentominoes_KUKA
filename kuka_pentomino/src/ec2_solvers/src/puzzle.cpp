@@ -16,9 +16,9 @@ namespace ec2{
         vector<vector<vector<char> >> pieces_temps; 
         pieces_temps.push_back(readMatrixFromFile("templates/f_matrix_template.txt", 3, 3));
         pieces_temps.push_back(readMatrixFromFile("templates/v_matrix_template.txt", 3, 3));
-        pieces_temps.push_back(readMatrixFromFile("templates/n_matrix_template.txt", 2, 4));
-        pieces_temps.push_back(readMatrixFromFile("templates/p_matrix_template.txt", 2, 3));
-        pieces_temps.push_back(readMatrixFromFile("templates/u_matrix_template.txt", 2, 3));
+        pieces_temps.push_back(readMatrixFromFile("templates/n_matrix_template.txt", 4, 2));
+        pieces_temps.push_back(readMatrixFromFile("templates/p_matrix_template.txt", 3, 2));
+        pieces_temps.push_back(readMatrixFromFile("templates/u_matrix_template.txt", 3, 2));
         pieces_temps.push_back(readMatrixFromFile("templates/x_matrix_template.txt", 3, 3));
 
         vector<tuple <char, int, int, double>> sol_positions; // pieceType, idxRows, idxCols, angle
@@ -61,18 +61,18 @@ namespace ec2{
             }
         }
 
-        vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0};
+        // vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0};
 
-        for (size_t i = 0; i < sol_positions.size(); i++)
-        {
-            for (size_t j = 0; i < names.size(); i++)
-            {
-                if(get<0>(sol_positions[i]) == names[j]){
-                    double new_ang = get<3>(sol_positions[i]) + angleToGrabTemp[j];
-                    sol_positions[i] = tuple <char, int, int, double>(get<0>(sol_positions[i]), get<1>(sol_positions[i]), get<2>(sol_positions[i]),new_ang );
-                }
-            }
-        }
+        // for (size_t i = 0; i < sol_positions.size(); i++)
+        // {
+        //     for (size_t j = 0; i < names.size(); i++)
+        //     {
+        //         if(get<0>(sol_positions[i]) == names[j]){
+        //             double new_ang = get<3>(sol_positions[i]) - angleToGrabTemp[j];
+        //             sol_positions[i] = tuple <char, int, int, double>(get<0>(sol_positions[i]), get<1>(sol_positions[i]), get<2>(sol_positions[i]),angle );
+        //         }
+        //     }
+        // }
         
 
         //order

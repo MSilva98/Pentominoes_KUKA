@@ -157,9 +157,9 @@ namespace ec2{
 
         // imshow("CANNY", thresholdImage);
         // imshow("MORPHOLOGY", frame);
-        imshow("GET PIECES CENTER", output);
-        waitKey(0);
-        destroyAllWindows();
+        // imshow("GET PIECES CENTER", output);
+        // waitKey(0);
+        // destroyAllWindows();
     }
 
     void pieceDetection::findPlayframe(Mat image, Point2d &innerCorner){

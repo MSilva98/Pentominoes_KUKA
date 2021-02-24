@@ -349,11 +349,12 @@ namespace ec2
         gripper_.setPosition(position, velocity);
         arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,0.038), 0.4);
         gripper_.grasp(velocity, force);
-        arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,-0.06), 0.4);    
+        arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,-0.15), 0.4);    
     }
 
-    void Solver::releasePiece(double position, double velocity, double force){
+    void Solver::releasePiece(double position, double velocity, double force){  
         gripper_.setPosition(position, velocity, force);  // use instead of release because doen't work
+        arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,-0.05), 0.4);
     }
 
     void Solver::solve()
@@ -526,34 +527,24 @@ namespace ec2
                     tmp = get<2>(grabPos[j]);
                     // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
                     setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
-                    grabPiece();
+                    grabPiece(0.02, 0.1, 120);
                 }
             }
                     
             // send to final position HERE
-            double x_final_pos_puzzle = -(get<1>(solution[i]) *0.036 + 0.034/2) ;
-            double y_final_pos_puzzle = -(get<2>(solution[i]) *0.036 + 0.034/2) ;
-            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle,0.0);
-            cout << "Grab Piece: " << get<0>(solution[i]) << " at angle: " << get<3>(solution[i]) << " and pos: " <<  piece_final_pos << endl;
-            setGripper(piece_final_pos, get<3>(solution[i])*(M_PI/180) , 0.2 );
-
-            // setGripper(tmp, get<1>(grabPos[i]), 0.2);
-            
-            ros::Duration(0.5).sleep();
+            cout << "Sol: " << get<1>(solution[i]) << ", " << get<2>(solution[i]) << endl;
+            // double x_final_pos_puzzle = (get<2>(solution[i]) *0.036);
+            // double y_final_pos_puzzle = -(get<1>(solution[i]) *0.036);
+            double x_final_pos_puzzle = -(get<1>(solution[i])*0.035)+0.050/2;
+            double y_final_pos_puzzle = -(get<2>(solution[i])*0.035)-0.010/2;
+            cout << "X: " << x_final_pos_puzzle << " Y: " << y_final_pos_puzzle << endl;
+            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.1);
+            angle = (360-get<3>(solution[i]))*(M_PI/180);
+            cout << "Piece solution: " << get<0>(solution[i]) << " at angle: " << angle << " and pos: " <<  piece_final_pos.transpose() << endl;
+            setGripper(piece_final_pos, angle, 0.2 );
             cout << "Drop piece"<< endl;
             releasePiece();
         }
-
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,-0.4), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(-45.0/180.0*M_PI, Eigen::Vector3d(0.0,0.0,1.0)), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.6,0.0,-0.6), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)AngleAxisd(M_PI, Eigen::Vector3d(1.0,0.0,0.0)), 0.4);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.02,0.025,0.5), 0.4);
-        // gripper_.setPosition(0.02,0.1);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,0.06), 0.4);
-        // gripper_.setPosition(0.06,0.1);
-        // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,-0.06), 0.4);
-        // gripper_.setPosition(0.02,0.1);
         
         // Show all images
         // waitKey(0);
