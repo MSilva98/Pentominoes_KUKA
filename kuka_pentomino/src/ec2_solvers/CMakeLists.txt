@@ -109,7 +109,7 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(solver src/solver.cpp src/pieceDetection.cpp)
+add_executable(solver src/solver.cpp src/pieceDetection.cpp src/puzzle.cpp)
 target_link_libraries(solver ${catkin_LIBRARIES})
 
 #############
