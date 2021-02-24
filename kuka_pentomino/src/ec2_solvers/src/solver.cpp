@@ -4,6 +4,7 @@
 
 #include <ec2_solvers/solver.h>
 #include <ec2_solvers/pieceDetection.h>
+#include <ec2_solvers/puzzle.h>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
@@ -361,6 +362,7 @@ namespace ec2
         ros::Duration(0.5).sleep();
 
         pieceDetection pieceDetect;
+        puzzle puzzle_solver;
         Mat color, depth;
         image_geometry::PinholeCameraModel modelPT, modelTCP;
         
@@ -512,18 +514,33 @@ namespace ec2
         }
 
         ROS_INFO("Grab pieces and solve puzzle...");
-        for(size_t i = 0; i < grabPos.size(); i++){
-            cout << "Piece: " << get<0>(grabPos[i]) << " at angle: " << get<1>(grabPos[i]) << " and pos: " << get<2>(grabPos[i]).transpose() << endl;
-            tmp = get<2>(grabPos[i]);
-            // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
-            setGripper(get<2>(grabPos[i]), get<1>(grabPos[i]), 0.2);
-            grabPiece();
-            
+        Eigen::Vector3d piece_final_pos;
+        double offset_pieces  = 0.04;
+        std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution();
+        for(size_t i = 0; i < solution.size(); i++){
+
+            for (size_t j = 0; j < grabPos.size(); j++)
+            {
+                if(get<0>(solution[i]) == get<0>(grabPos[j])){
+                    cout << "Grab Piece: " << get<0>(grabPos[j]) << " at angle: " << get<1>(grabPos[j]) << " and pos: " << get<2>(grabPos[j]).transpose() << endl;
+                    tmp = get<2>(grabPos[j]);
+                    // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
+                    setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
+                    grabPiece();
+                }
+            }
+                    
             // send to final position HERE
+            double x_final_pos_puzzle = -(get<1>(solution[i]) *0.036 + 0.034/2) ;
+            double y_final_pos_puzzle = -(get<2>(solution[i]) *0.036 + 0.034/2) ;
+            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle,0.0);
+            cout << "Grab Piece: " << get<0>(solution[i]) << " at angle: " << get<3>(solution[i]) << " and pos: " <<  piece_final_pos << endl;
+            setGripper(piece_final_pos, get<3>(solution[i])*(M_PI/180) , 0.2 );
 
             // setGripper(tmp, get<1>(grabPos[i]), 0.2);
             
             ros::Duration(0.5).sleep();
+            cout << "Drop piece"<< endl;
             releasePiece();
         }
 
