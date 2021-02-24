@@ -307,7 +307,7 @@ namespace ec2
         cout << "Pixel: " << pixel << " Corresponding 3d Point: " << pos.transpose() << endl;
     }
 
-    bool Solver::setGrasp(const Eigen::Vector3d& position, double yaw, double velocity, bool blocking){
+    bool Solver::setGripper(const Eigen::Vector3d& position, double yaw, double velocity, bool blocking){
         double p = M_PI;
 
         Eigen::Affine3d pose = Eigen::Translation3d(position) *
@@ -476,7 +476,7 @@ namespace ec2
                 //     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
                 // }
                 cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
-                angle = 360-angle;          // convert to counter clockwise
+                // angle = 360-angle;          // convert to counter clockwise
                 angle = angle*(M_PI/180);   // convert to radians
                 angle += yaw;
                 getBasePosFromPixel(pointPiece, tmp, modelTCP);
@@ -491,7 +491,7 @@ namespace ec2
             gripper_.setPosition(0.02, 0.1);
             tmp = get<2>(grabPos[i]);
             // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
-            setGrasp(tmp, get<1>(grabPos[i]), 0.2);
+            setGripper(tmp, get<1>(grabPos[i]), 0.2);
 
             cout << "Grab POS: " << tmp.transpose() << " P5 POS: " << posP5[i].transpose() << endl;
             
