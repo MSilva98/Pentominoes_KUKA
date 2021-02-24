@@ -18,7 +18,7 @@ namespace ec2{
         cv::Mat contoursToImg(std::vector<cv::Point> contours, cv::Mat output);
         bool categorizeAndDetect(std::vector<cv::Mat> templates, std::vector<cv::Point> sample, char &piece, double &angle, cv::Point &pointPiece);
         cv::Point rotatePointOrigin(cv::Point p, double ang);
-        std::vector<cv::Point> imagePieceToContours(cv::Mat image, cv::Mat &output);
+        std::vector<cv::Point> imagePieceToContours(cv::Mat image);
     };
 }
 

@@ -307,6 +307,22 @@ namespace ec2
         cout << "Pixel: " << pixel << " Corresponding 3d Point: " << pos.transpose() << endl;
     }
 
+    void Solver::removeClosePoints(vector<Eigen::Vector3d> &posP5){
+        double d;
+        for(size_t i = 0; i < posP5.size(); i++){
+            for(size_t j = 0; j < posP5.size(); j++){
+                if(i!=j){
+                    d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
+                    cout << "dist: " << d << "\nI: " << posP5[i].transpose() << "\nJ: " << posP5[j].transpose() << endl;
+                    if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
+                        cout << "CLOSE POINTS\n" << posP5[i].transpose() << "\n" << posP5[j].transpose() << endl;
+                        posP5.erase(posP5.begin()+j);
+                    }    
+                }    
+            }
+        }
+    }
+
     bool Solver::setGripper(const Eigen::Vector3d& position, double yaw, double velocity, bool blocking){
         double p = M_PI;
 
@@ -398,10 +414,8 @@ namespace ec2
         for(size_t i = 0; i < detectedPiecesPT.size(); i++){
             detectedPiecesPT[i].z() = 0.2;
             cout << "Detected pieces at: " << detectedPiecesPT[i].transpose() << endl;
-            // Correct this to define a better angle
-            // if(i < 2)
-            //     lookAt(detectedPiecesPT[i], M_PI, 0.2, true);
-            // else
+            // rotate until it's possible to reach position
+            // if 360º rotation then skip position
             yaw = 0;
             ok = lookAt(detectedPiecesPT[i], yaw, 0.2, true);
             while(not ok){
@@ -416,7 +430,7 @@ namespace ec2
                 ros::Duration(1.0).sleep();
                 getDataFromTCP(color, depth, modelTCP, true);
                 name = "tempImages/top_image_" + to_string(i) + ".png";
-                imshow(name, color);
+                // imshow(name, color);
                 imwrite(name, color);
 
                 // Pieces detected from TOP VIEW
@@ -428,6 +442,9 @@ namespace ec2
                     tmp.z() = 0.07; //0.035
                     posP5.push_back(tmp);
                 }
+            }
+            else{
+                ROS_WARN("Arm can't reach point: x:%.3f y:%.3f z:%.3f", detectedPiecesPT[i].x(), detectedPiecesPT[i].y(), detectedPiecesPT[i].z());
             }
         }
 
@@ -447,18 +464,14 @@ namespace ec2
         char piece; 
         double angle; 
         Point pointPiece;
-        Mat output;
+        // Mat output;
         vector<Point> contours_image;
         vector<tuple<char, double, Eigen::Vector3d>> grabPos;        
         // Send arm to position of each piece and capture it
         for (size_t j = 0; j < posP5.size(); j++){
             cout << "P5 pos: " << posP5[j].transpose() << endl;
-            // lookAt rotation is counter clockwise
-            // if(j == 0 || j == 1)
-            //     lookAt(posP5[j], M_PI, 0.2, true);
-            // else if(j == 4)
-            //     lookAt(posP5[j], -M_PI_2, 0.2, true);
-            // else
+            // rotate until it's possible to reach position
+            // if 360º rotation then skip position
             yaw = 0;
             ok = lookAt(posP5[j], yaw, 0.2, true);
             while(not ok){
@@ -472,13 +485,13 @@ namespace ec2
                 getDataFromTCP(color, depth, modelTCP, true);
                 name = "tempImages/Piece"+to_string(j)+".png";
                 cvtColor(color, color, CV_BGR2RGB);
-                imshow(name, color);
+                // imshow(name, color);
                 imwrite(name, color);
 
                 cout << "Categorize Pieces" << endl;
-                contours_image = pieceDetect.imagePieceToContours(color, output);
+                contours_image = pieceDetect.imagePieceToContours(color);
                 bool status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
-                double current_yaw = 0.2;
+                // double current_yaw = 0.2;
                 //rotate robot until recognize the piece
                 // while(!status){
                 //     current_yaw = current_yaw + M_PI/5;
@@ -492,6 +505,9 @@ namespace ec2
                 angle += yaw;
                 getBasePosFromPixel(pointPiece, tmp, modelTCP);
                 grabPos.push_back(make_tuple(piece, angle, tmp));
+            }
+            else{
+                ROS_WARN("Arm can't reach point: x:%.3f y:%.3f z:%.3f", posP5[j].x(), posP5[j].y(), posP5[j].z());
             }
         }
 
@@ -525,22 +541,6 @@ namespace ec2
         // Show all images
         // waitKey(0);
         // destroyAllWindows();
-    }
-
-    void Solver::removeClosePoints(vector<Eigen::Vector3d> &posP5){
-        double d;
-        for(size_t i = 0; i < posP5.size(); i++){
-            for(size_t j = 0; j < posP5.size(); j++){
-                if(i!=j){
-                    d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
-                    cout << "dist: " << d << "\nI: " << posP5[i].transpose() << "\nJ: " << posP5[j].transpose() << endl;
-                    if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
-                        cout << "CLOSE POINTS\n" << posP5[i].transpose() << "\n" << posP5[j].transpose() << endl;
-                        posP5.erase(posP5.begin()+j);
-                    }    
-                }    
-            }
-        }
     }
 
 } // namespace ec2

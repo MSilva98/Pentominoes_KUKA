@@ -108,7 +108,7 @@ namespace ec2{
                 output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
             }
         }
-        imshow(name, output);
+        // imshow(name, output);
         imwrite("tempImages/"+name+".png", output);
         imwrite("tempImages/"+name+"_canny.png", image);
         // waitKey(0);
@@ -211,13 +211,13 @@ namespace ec2{
                 output.at<Vec3b>(innerCorner.y, innerCorner.x-1) = Vec3b(0,0,255);
             }
         }
-        imshow("PLAY FRAME", output);
+        // imshow("PLAY FRAME", output);
         imwrite("tempImages/PLAYFRAME.png", output);
         // waitKey(0);
         // destroyAllWindows();
     }
 
-    vector<Point> pieceDetection::imagePieceToContours(Mat image, Mat &output){
+    vector<Point> pieceDetection::imagePieceToContours(Mat image){
         Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat;
 
         Mat kernel = Mat::ones(20,20, CV_32F);
@@ -245,7 +245,7 @@ namespace ec2{
         }
 
         //Output image to draw contours on
-        //Mat output;
+        Mat output;
         output = Mat::zeros( image.size(), CV_8UC3 );
 
         RNG rng(12345);
