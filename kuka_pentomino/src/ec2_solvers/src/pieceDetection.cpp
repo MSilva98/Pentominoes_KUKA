@@ -78,10 +78,11 @@ namespace ec2{
         Mat diff, image, output = Mat::zeros(frame.size(), CV_8UC3);
         // Remove background including table and black frame
         bitwise_xor(templ, frame, diff);
+        medianBlur(diff, diff, 3);
         // Convert to grayscale
         cvtColor(diff, diff, CV_BGR2GRAY);
         // Apply Canny for edge detection
-        Canny(diff, image, 150, 255, 3);
+        Canny(diff, image, 40, 80, 3);
         // Apply dilation followed by erosion
         morphologyEx(image, diff, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
         
@@ -92,7 +93,7 @@ namespace ec2{
 
         Point2d center;
         for( size_t i = 0; i < contours.size(); i++ ){
-            if(contours[i].size() > 150){
+            if(contours[i].size() > 80){
                 drawContours(output, contours, i, Scalar(255,255,255), CV_FILLED);
                 Rect br = boundingRect(contours[i]);
                 center = Point2d(br.x+br.width/2, br.y+br.height/2);
@@ -108,7 +109,6 @@ namespace ec2{
                 output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
             }
         }
-        // imshow(name, output);
         imwrite("tempImages/"+name+".png", output);
         imwrite("tempImages/"+name+"_canny.png", image);
         // waitKey(0);

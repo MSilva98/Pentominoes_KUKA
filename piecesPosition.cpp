@@ -10,16 +10,16 @@ using namespace std;
 
 int main(){
 
-    Mat b = imread("templateRight.png", IMREAD_COLOR);
+    Mat b = imread("templateLeft.png", IMREAD_COLOR);
     Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat, image;
 
-    frame = imread("rightPieces.png", IMREAD_COLOR);
+    frame = imread("leftPieces.png", IMREAD_COLOR);
 
     bitwise_xor(b, frame, diff_im);
-
+    medianBlur(diff_im, diff_im, 3);
     cvtColor(diff_im, diff_im, CV_BGR2GRAY);
-    Canny(diff_im, image, 140, 255, 3);
-    // imshow("canny", image);
+    Canny(diff_im, image, 40, 80, 3);
+    imshow("canny", image);
     morphologyEx(image, image, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
 
     // medianBlur(diff_im, blurredImage, 7);
@@ -75,7 +75,7 @@ int main(){
     // cout << contours1.size() << endl;
     // Draw contours.
     for (size_t i = 0; i < contours1.size(); i++){
-        if(contours1[i].size() > 180){
+        if(contours1[i].size() > 80){
             drawContours(output, contours1, i, Scalar(255,255,255), CV_FILLED);
             Rect br = boundingRect(contours1[i]);
             x = br.x+br.width/2;
@@ -145,7 +145,6 @@ int main(){
     // display images
     // imshow("image", image);
     imshow("output", output);
-    // imshow("canny", thresholdedImage);
 
     //Press esc to exit the program
     waitKey(0);
