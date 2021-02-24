@@ -98,6 +98,8 @@ protected:
     void getBasePosFromPixel(cv::Point2d pixel, Eigen::Vector3d &pos, image_geometry::PinholeCameraModel model);
     void removeClosePoints(std::vector<Eigen::Vector3d> &posP5);
     bool setGripper(const Eigen::Vector3d& position, double yaw, double velocity, bool blocking = true);
+    void grabPiece(double position = 0.02, double velocity = 0.1, double force = 80);
+    void releasePiece(double position = 0.02, double velocity = 0.1, double force = 80);
 
     void info(const char* fmt, ...);
     void warn(const char* fmt, ...);

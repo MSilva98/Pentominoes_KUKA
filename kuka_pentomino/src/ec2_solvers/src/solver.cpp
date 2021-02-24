@@ -328,6 +328,17 @@ namespace ec2
         return true;
     }
 
+    void Solver::grabPiece(double position, double velocity, double force){
+        gripper_.setPosition(position, velocity);
+        arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,0.038), 0.4);
+        gripper_.grasp(velocity, force);
+        arm_.moveRelativeTCP((Eigen::Affine3d)Translation3d(0.0,0.0,-0.06), 0.4);    
+    }
+
+    void Solver::releasePiece(double position, double velocity, double force){
+        gripper_.setPosition(position, velocity, force);  // use instead of release because doen't work
+    }
+
     void Solver::solve()
     {
         ec2if_.connect(true, true, false);
@@ -476,7 +487,7 @@ namespace ec2
                 //     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
                 // }
                 cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
-                // angle = 360-angle;          // convert to counter clockwise
+                angle = 360-angle;          // convert to counter clockwise
                 angle = angle*(M_PI/180);   // convert to radians
                 angle += yaw;
                 getBasePosFromPixel(pointPiece, tmp, modelTCP);
@@ -484,23 +495,20 @@ namespace ec2
             }
         }
 
-
         ROS_INFO("Grab pieces and solve puzzle...");
         for(size_t i = 0; i < grabPos.size(); i++){
             cout << "Piece: " << get<0>(grabPos[i]) << " at angle: " << get<1>(grabPos[i]) << " and pos: " << get<2>(grabPos[i]).transpose() << endl;
-            gripper_.setPosition(0.02, 0.1);
             tmp = get<2>(grabPos[i]);
             // tmp.z() = -0.085;    // table is at z=-0.115 in arm frame
-            setGripper(tmp, get<1>(grabPos[i]), 0.2);
-
-            cout << "Grab POS: " << tmp.transpose() << " P5 POS: " << posP5[i].transpose() << endl;
+            setGripper(get<2>(grabPos[i]), get<1>(grabPos[i]), 0.2);
+            grabPiece();
             
-            // gripper_.setPosition(0.06, 0.1);
-            // // tmp.z() = 0.05;
-            // setGrasp(tmp, get<1>(grabPos[i]), 0.2);
+            // send to final position HERE
+
+            // setGripper(tmp, get<1>(grabPos[i]), 0.2);
             
             ros::Duration(0.5).sleep();
-            // gripper_.setPosition(0.02,0.1);
+            releasePiece();
         }
 
         // arm_.moveRelativeTCP((Affine3d)Translation3d(0.0,0.0,-0.4), 0.4);

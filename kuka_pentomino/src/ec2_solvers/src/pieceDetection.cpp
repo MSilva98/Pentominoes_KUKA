@@ -81,9 +81,9 @@ namespace ec2{
         // Convert to grayscale
         cvtColor(diff, diff, CV_BGR2GRAY);
         // Apply Canny for edge detection
-        Canny(diff, diff, 150, 255, 3);
+        Canny(diff, image, 150, 255, 3);
         // Apply dilation followed by erosion
-        morphologyEx(diff, diff, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
+        morphologyEx(image, diff, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
         
         vector<vector<Point>> contours, contours1;
         vector<Vec4i> hierarchy;
@@ -110,6 +110,7 @@ namespace ec2{
         }
         imshow(name, output);
         imwrite("tempImages/"+name+".png", output);
+        imwrite("tempImages/"+name+"_canny.png", image);
         // waitKey(0);
         // destroyAllWindows();
     }
@@ -157,8 +158,8 @@ namespace ec2{
         // imshow("CANNY", thresholdImage);
         // imshow("MORPHOLOGY", frame);
         imshow("GET PIECES CENTER", output);
-        // waitKey(0);
-        // destroyAllWindows();
+        waitKey(0);
+        destroyAllWindows();
     }
 
     void pieceDetection::findPlayframe(Mat image, Point2d &innerCorner){
