@@ -277,7 +277,7 @@ namespace ec2{
     bool pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
         
         vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
-        vector<double> angleToGrabTemp{0, 0, 90, 90, 90, 0};
+        vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0};
 
         //default points to grab
         vector<Point> point_grab;
