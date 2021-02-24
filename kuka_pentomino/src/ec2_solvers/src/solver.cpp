@@ -317,9 +317,8 @@ namespace ec2
 
         pose.translation().z() = std::max(0.03, pose.translation().z());
         
-        Eigen::Vector3d flange_tcp(-0.057, -0.032 + 0.05, 0.074);
-
-        // adjust for the camera
+        Eigen::Vector3d flange_tcp(0.0, 0.000 , 0.074);
+        // adjust for the gripper
         pose.translation() += pose.translation() - pose * flange_tcp;
 
         bool ret = arm_.setTCPPose(pose, velocity, blocking);
