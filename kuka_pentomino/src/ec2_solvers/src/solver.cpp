@@ -252,49 +252,11 @@ namespace ec2
         return true;
     }
 
-
-
-// =============================================================================================================================
-
-
-    bool Solver::getTCPModel(image_geometry::PinholeCameraModel &model, bool now){
-        // this is only use here and nowhere else
-        static ros::Time latest_stamp(0);
-        ros::Time stamp = now ? ros::Time::now() : latest_stamp;
-
-        cv_bridge::CvImagePtr bridge_color;
-        cv_bridge::CvImagePtr bridge_depth;
-
-        bool ok = ec2if_.getTCPcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(10));
-        if (not ok)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    bool Solver::getPTModel(image_geometry::PinholeCameraModel &model, bool now){
-        // this is only use here and nowhere else
-        static ros::Time latest_stamp(0);
-        ros::Time stamp = now ? ros::Time::now() : latest_stamp;
-
-        cv_bridge::CvImagePtr bridge_color;
-        cv_bridge::CvImagePtr bridge_depth;
-
-        bool ok = ec2if_.getPTcam()->getData(bridge_color, bridge_depth, model, stamp, ros::Duration(10));
-        if (not ok)
-        {
-            return false;
-        }
-        return true;
-    }
-
     void Solver::getBasePosFromPixel(Point2d pixel, Eigen::Vector3d &pos, image_geometry::PinholeCameraModel model){
         double Z = -0.082;
         // Convert 2d point to 3d ray passing in point P
         Point3d v;
         v = model.projectPixelTo3dRay(pixel);
-        // cout << "3d Ray: " << v << endl;
         // Transformation to Base
         Eigen::Affine3d tf;
         getTransformation("iiwa_base", model.tfFrame(), tf);
@@ -314,9 +276,9 @@ namespace ec2
             for(size_t j = 0; j < posP5.size(); j++){
                 if(i!=j){
                     d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
-                    cout << "dist: " << d << "\nI: " << posP5[i].transpose() << "\nJ: " << posP5[j].transpose() << endl;
+                    cout << "dist: " << d << "I: " << posP5[i].transpose() << "J: " << posP5[j].transpose() << endl;
                     if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
-                        cout << "CLOSE POINTS\n" << posP5[i].transpose() << "\n" << posP5[j].transpose() << endl;
+                        cout << "Close Points!" << endl;
                         posP5.erase(posP5.begin()+j);
                     }    
                 }    
@@ -410,7 +372,7 @@ namespace ec2
         // Prevents unnecessary visits to pieces
         removeClosePoints(detectedPiecesPT);
         
-        ROS_INFO("Getting mid-point for each piece...");
+        ROS_INFO("Getting each piece mid-point...");
         string name;
         double yaw = 0;
         bool ok;
@@ -427,7 +389,6 @@ namespace ec2
                     break;
                 ok = lookAt(detectedPiecesPT[i], yaw, 0.2, true);
             }
-            // If can reach get the top image, else means its a point unreachable with the arm in this position
             if(ok){
                 // Sleep 1 second
                 ros::Duration(1.0).sleep();
@@ -487,15 +448,14 @@ namespace ec2
                 getDataFromTCP(color, depth, modelTCP, true);
                 name = "tempImages/Piece"+to_string(j)+".png";
                 cvtColor(color, color, CV_BGR2RGB);
-                // imshow(name, color);
                 imwrite(name, color);
 
-                cout << "Categorize Pieces" << endl;
+                ROS_INFO("Categorize Pieces");
                 contours_image = pieceDetect.imagePieceToContours(color);
                 bool status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
                 //rotate robot until recognize the piece
                 while(!status){
-                    cout << "Try Categorize Piece Again" << endl;
+                    ROS_INFO("Failed to classify. \nTrying Categorize Piece Again");
                     bool statusPose = false;
                     while(not statusPose){
                         yaw += M_PI/2;
@@ -505,9 +465,8 @@ namespace ec2
                     }
                     ros::Duration(1.0).sleep();
                     getDataFromTCP(color, depth, modelTCP, true);
-                    name = "tempImages/Piece"+to_string(j)+".png";
+                    name = "tempImages/Piece"+to_string(j)+"_"+to_string(yaw)+".png";
                     cvtColor(color, color, CV_BGR2RGB);
-                    // imshow(name, color);
                     imwrite(name, color);
                     contours_image = pieceDetect.imagePieceToContours(color);
                     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
@@ -526,31 +485,28 @@ namespace ec2
 
         ROS_INFO("Grab pieces and solve puzzle...");
         Eigen::Vector3d piece_final_pos;
-        double offset_pieces  = 0.04;
+        double x_final_pos_puzzle, y_final_pos_puzzle;
         std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution();
         for(size_t i = 0; i < solution.size(); i++){
-
-            for (size_t j = 0; j < grabPos.size(); j++)
-            {
+            for (size_t j = 0; j < grabPos.size(); j++){
                 if(get<0>(solution[i]) == get<0>(grabPos[j])){
                     cout << "Grab Piece: " << get<0>(grabPos[j]) << " at angle: " << get<1>(grabPos[j]) << " and pos: " << get<2>(grabPos[j]).transpose() << endl;
-                    tmp = get<2>(grabPos[j]);
                     setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
-                    grabPiece(0.02, 0.1, 120);
+                    grabPiece(0.01, 0.1, 120);
                 }
-            }
-                    
-            double x_final_pos_puzzle = -(get<1>(solution[i])*0.035)+0.005;
-            double y_final_pos_puzzle = -(get<2>(solution[i])*0.035)-0.025;
+            }        
+            x_final_pos_puzzle = -(get<1>(solution[i])*0.0358)+0.0065;
+            y_final_pos_puzzle = -(get<2>(solution[i])*0.0358)-0.025;
             piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.17);
-            angle = (360-get<3>(solution[i]))*(M_PI/180);
+            angle = ((360-get<3>(solution[i]))*(M_PI/180))+yaw;
             cout << "Piece solution: " << get<0>(solution[i]) << " at angle: " << angle << " and pos: " <<  piece_final_pos.transpose() << endl;
             setGripper(piece_final_pos, angle, 0.2);
-            cout << "Drop piece"<< endl;
+            cout << "Drop piece in place"<< endl;
             releasePiece(0.01, 0.1, 80);
         }
-        
         ROS_INFO("Pentominoes Puzzle Finished");
+        resetArm();
+        ros::shutdown();
     }
 
 } // namespace ec2

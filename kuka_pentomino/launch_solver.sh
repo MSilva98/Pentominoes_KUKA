@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# catkin build ec2_solvers
+catkin build ec2_solvers
 
 . devel/setup.bash
 

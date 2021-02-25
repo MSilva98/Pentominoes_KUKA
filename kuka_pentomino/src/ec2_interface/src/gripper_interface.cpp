@@ -31,7 +31,7 @@ bool GripperInterface::grasp(double velocity, double force)
 //
 //    return false;
 	gripper_msgs::Move move_msg;
-	move_msg.request.position = 0.0352;//0.06 - (position / 2.0);
+	move_msg.request.position = 0.03515;//0.06 - (position / 2.0);
 	move_msg.request.velocity = velocity;
 	move_msg.request.force    = force;
 
