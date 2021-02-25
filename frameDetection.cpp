@@ -10,11 +10,16 @@ using namespace cv;
 void getPiecesCenter(Mat &frame, Mat &thresholdImage, Mat &output, int run);
 
 int main(){
-    Mat frame1 = imread("rightPieces.png", IMREAD_GRAYSCALE);
+    Mat frame1 = imread("templateRight.png", IMREAD_GRAYSCALE);
     Mat canny1 = Mat::zeros(frame1.size(), CV_8UC3);
     Mat output1 = Mat::zeros(frame1.size(), CV_8UC3);
     
     getPiecesCenter(frame1, canny1, output1, 1);
+    getPiecesCenter(frame1, canny1, output1, 1);
+    getPiecesCenter(frame1, canny1, output1, 1);
+    getPiecesCenter(frame1, canny1, output1, 1);
+    getPiecesCenter(frame1, canny1, output1, 1);
+
     imshow("FRAME1", frame1);    
     imshow("CANNY1", canny1);
     imshow("OUT1", output1);
@@ -93,10 +98,6 @@ void getPiecesCenter(Mat &frame, Mat &thresholdImage, Mat &output, int run){
             output.at<Vec3b>(innerCorner.y, innerCorner.x-1) = Vec3b(0,0,255);
         }
     }
-
-    // 6 cubes vertical     -> (6*.34)-0.01 = 2.03
-    // 5 cubes horizontal   -> (5*.34)-0.01 = 1.69
-
 
     // imshow("CANNY", thresholdImage);
     // imshow("Frame", frame);

@@ -86,14 +86,14 @@ namespace ec2{
         // Apply dilation followed by erosion
         morphologyEx(image, diff, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
         
-        vector<vector<Point>> contours, contours1;
+        vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
         // Find contours of pieces
         findContours(diff, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0,0));
 
         Point2d center;
         for( size_t i = 0; i < contours.size(); i++ ){
-            if(contours[i].size() > 80){
+            if(contours[i].size() > 20){
                 drawContours(output, contours, i, Scalar(255,255,255), CV_FILLED);
                 Rect br = boundingRect(contours[i]);
                 center = Point2d(br.x+br.width/2, br.y+br.height/2);

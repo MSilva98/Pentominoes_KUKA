@@ -8,19 +8,97 @@ using namespace std;
 
 //g++ -ggdb imgRec_v3.cpp -o imgRec `pkg-config --cflags --libs opencv`
 
+void getPieces(Mat b, Mat frame, Mat &canny, Mat &image, Mat &output);
+
 int main(){
 
-    Mat b = imread("templateLeft.png", IMREAD_COLOR);
-    Mat frame, fgMask, diff_im, blurredImage, im_th, im_out, greyMat, image;
+    Mat bL = imread("templateLeft.png", IMREAD_COLOR);
+    Mat b = imread("templateRight.png", IMREAD_COLOR);
+    
+    Mat left = imread("leftPieces.png", IMREAD_COLOR);
+    Mat right = imread("rightPieces.png", IMREAD_COLOR);
+    Mat right1 = imread("rightPiecesPT.png", IMREAD_COLOR);
+    Mat right2 = imread("rightPieces2.png", IMREAD_COLOR);
+    Mat right3 = imread("rightPieces3.png", IMREAD_COLOR);
+    Mat right4 = imread("rightPieces4.png", IMREAD_COLOR);
+    Mat right5 = imread("rightPieces5.png", IMREAD_COLOR);
 
-    frame = imread("leftPieces.png", IMREAD_COLOR);
+    Mat outputL = Mat::zeros(b.size(), CV_8UC3);
+    Mat outputR = Mat::zeros(b.size(), CV_8UC3);
+    Mat output1 = Mat::zeros(b.size(), CV_8UC3);
+    Mat output2 = Mat::zeros(b.size(), CV_8UC3);
+    Mat output3 = Mat::zeros(b.size(), CV_8UC3);
+    Mat output4 = Mat::zeros(b.size(), CV_8UC3);
+    Mat output5 = Mat::zeros(b.size(), CV_8UC3);
 
+    Mat cannyL, imageL;
+    Mat cannyR, imageR;
+    Mat canny1, image1;
+    Mat canny2, image2;
+    Mat canny3, image3;
+    Mat canny4, image4;
+    Mat canny5, image5;
+
+    getPieces(bL, left, cannyL, imageL, outputL);
+    // display images
+    // imshow("image", imageL);
+    imshow("canny", cannyL);
+    imshow("output", outputL);
+
+    getPieces(b, right, cannyR, imageR, outputR);
+    // display images
+    // imshow("imageR", imageR);
+    imshow("cannyR", cannyR);
+    imshow("outputR", outputR);
+
+    getPieces(b, right1, canny1, image1, output1);
+    // display images
+    // imshow("image1", image1);
+    imshow("canny1", canny1);
+    imshow("output1", output1);
+
+    
+    getPieces(b, right2, canny2, image2, output2);
+    // display images
+    // imshow("image2", image2);
+    imshow("canny2", canny2);
+    imshow("output2", output2);
+
+    getPieces(b, right3, canny3, image3, output3);
+    // display images
+    // imshow("image3", image3);
+    imshow("canny3", canny3);
+    imshow("output3", output3);
+
+    getPieces(b, right4, canny4, image4, output4);
+    // display images
+    // imshow("image4", image4);
+    imshow("canny4", canny4);
+    imshow("output4", output4);
+
+    getPieces(b, right5, canny5, image5, output5);
+    // display images
+    // imshow("image5", image5);
+    imshow("canny5", canny5);
+    imshow("output5", output5);
+    //Press esc to exit the program
+    waitKey(0);
+
+    //close all the opened windows
+    destroyAllWindows();
+
+    return 0;
+}
+
+void getPieces(Mat b, Mat frame, Mat &canny, Mat &image, Mat &output){
+
+    Mat diff_im;
     bitwise_xor(b, frame, diff_im);
     medianBlur(diff_im, diff_im, 3);
     cvtColor(diff_im, diff_im, CV_BGR2GRAY);
-    Canny(diff_im, image, 40, 80, 3);
-    imshow("canny", image);
-    morphologyEx(image, image, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
+    Canny(diff_im, canny, 40, 80, 3);
+    // imshow("canny", image);
+    morphologyEx(canny, image, MORPH_CLOSE, Mat::ones(8,8,CV_8U));
 
     // medianBlur(diff_im, blurredImage, 7);
 
@@ -54,10 +132,6 @@ int main(){
     // Canny(image, thresholdedImage, 40, 85, 5);
     findContours(image, contours1, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-    //Output image to draw contours on
-    Mat output;
-    output = Mat::zeros(image.size(), CV_8UC3);
-
     // double epsilon;
     // vector<Point> tmp;
     // for (size_t i = 0; i < contours1.size(); i++){
@@ -72,22 +146,13 @@ int main(){
     Point2d center;
     double x,y;
     double minX = 99999, minY=99999, maxX=0, maxY=0;
-    // cout << contours1.size() << endl;
     // Draw contours.
     for (size_t i = 0; i < contours1.size(); i++){
-        if(contours1[i].size() > 80){
+        if(contours1[i].size() > 20){
             drawContours(output, contours1, i, Scalar(255,255,255), CV_FILLED);
             Rect br = boundingRect(contours1[i]);
             x = br.x+br.width/2;
             y = br.y+br.height/2;
-            if(x < minX)
-                minX = x;
-            if(y < minY)
-                minY = y;
-            if(x > maxX)
-                maxX = x;
-            if(y > maxY)
-                maxY = y;
             pieceCenters.push_back(Point2d(x,y));
             center = Point2d(x,y);
             output.at<Vec3b>(center.y, center.x) = Vec3b(0,0,255);
@@ -101,56 +166,4 @@ int main(){
             output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
         }
     }    
-
-    // for (size_t i = 0; i < pieceCenters.size(); i++)
-    // {
-    //     Point2d p = pieceCenters.at(i);
-    //     if(p.x < minX)
-    //         minX = p.x;
-    //     if(p.y < minY)
-    //         minY = p.y;
-    //     if(p.x > maxX)
-    //         maxX = p.x;
-    //     if(p.y > maxY)
-    //         maxY = p.y;
-    // }
-    // Rect f = Rect(Point(minX, minY), Point(maxX, maxY));
-
-    // Point2d center = Point2d(f.x+f.width/2, f.y+f.height/2);
-
-    // output.at<Vec3b>(center.y, center.x) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y+1, center.x) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y-1, center.x) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y, center.x+1) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y, center.x-1) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y+1, center.x+1) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y+1, center.x-1) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y-1, center.x+1) = Vec3b(0,0,255);
-    // output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
-
-    // cout << pieceCenters << endl;
-
-    // for (size_t i = 0; i < pieceCenters.size(); i++){
-    //     output.at<Vec3b>(pieceCenters.at(i).y,pieceCenters.at(i).x) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y+1,pieceCenters.at(i).x+1) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y-1,pieceCenters.at(i).x+1) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y-1,pieceCenters.at(i).x-1) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y+1,pieceCenters.at(i).x-1) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y-1,pieceCenters.at(i).x) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y+1,pieceCenters.at(i).x) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y,pieceCenters.at(i).x+1) = Vec3b(0,0,255);
-    //     output.at<Vec3b>(pieceCenters.at(i).y,pieceCenters.at(i).x-1) = Vec3b(0,0,255);
-    // }
-    
-    // display images
-    // imshow("image", image);
-    imshow("output", output);
-
-    //Press esc to exit the program
-    waitKey(0);
-
-    //close all the opened windows
-    destroyAllWindows();
-
-    return 0;
 }
