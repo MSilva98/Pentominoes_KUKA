@@ -10,7 +10,7 @@ namespace ec2{
     class puzzle
     {
     public:
-        std::vector<std::vector<char>> readMatrixFromFile(std::string name_file, int rows, int cols );
+        std::vector<std::vector<char>> readMatrixFromFile(std::string name_file);
         std::vector<std::vector<char>> rotate90clockwise(std::vector<std::vector<char>> temp);
         std::vector<std::vector<char>> getSubArray(std::vector<std::vector<char>> arr, int idxRow, int idxCol, int rows, int cols);
         bool matchArrayPiece(std::vector<std::vector<char>> arrGame, std::vector<std::vector<char>> arrPiece, char typePiece);
