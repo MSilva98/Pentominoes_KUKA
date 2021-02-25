@@ -272,6 +272,11 @@ namespace ec2{
         return contours[idx];
     }
 
+    bool pieceDetection::checkPointInside(Point pP, Point pA, Point pB){
+        double margin = 20;
+        //cout << " d1 " << distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) << " d2 " << distance(pA.x, pA.y, pB.x, pB.y) << endl;
+        return (distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) > distance(pA.x, pA.y, pB.x, pB.y) - margin) && (distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) < distance(pA.x, pA.y, pB.x, pB.y) + margin);
+    }
 
     bool pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
         
@@ -305,7 +310,7 @@ namespace ec2{
 
         RotatedRect boxxx;
 
-        int perimInt = 300;
+        int perimInt = 390;
         int areaInt = 37000;
         int idxPiece = -1;
 
@@ -355,199 +360,181 @@ namespace ec2{
 
 
         //calculate the right angle
-        int margin = 25; //
-        if(idxPiece == 0){ //F
-            Point2f vtxBox[4];
-            box.points(vtxBox);
-            vector<vector<Point>> points_by_side(4);
-            //points_by_side.resize(4);
-            int side = 1;
-            //seperate point by box side
-            for(int i = 0; i < 4; i++ ){
-                for (int j = 0; j < sample.size(); ++j)
-                {
-                    if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
-                    || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
-                        if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
-                        || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
-                            points_by_side[i].push_back(sample[j]);
-                        }
-                    }
-                }
-            }
-            //calc where the reference side are
-            for (int i = 0; i < points_by_side.size(); ++i)
+    int margin = 25; //
+    if(idxPiece == 0){ //F
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 1;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
             {
-                if(points_by_side[i].size() == 2){
-                    float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
-                    float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
-                    if( dist_pts > 0.60*(dist_vtx)){
-                        side = i;
-                    }
+                
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
                 }
             }
-            //calc angle based on side
-            if(side == 0){
-                angle = angle + 270;
-            }else if(side == 2){
-                angle = angle + 90;
-            }else if(side == 3){
-                angle = angle + 180;
-            }
-
-        }else if(idxPiece == 1){ //V
-            Point2f vtxBox[4];
-            box.points(vtxBox);
-            vector<vector<Point>> points_by_side(4);
-            //points_by_side.resize(4);
-            int side = 3;
-            //seperate point by box side
-            for(int i = 0; i < 4; i++ ){
-                for (int j = 0; j < sample.size(); ++j)
-                {
-                    if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
-                    || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
-                        if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
-                        || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
-                            points_by_side[i].push_back(sample[j]);
-                        }
-                    }
-                }
-            }
-            //calc where the reference side are
-            for (int i = 0; i < points_by_side.size() - 1; ++i)
-            {
-                if(points_by_side[i].size() == 2){
-                    float dist_pts0 = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
-                    float dist_pts1 = distance(points_by_side[i+1][0].x,points_by_side[i+1][0].y,points_by_side[i+1][1].x,points_by_side[i+1][1].y );
-                    float dist_vtx0 = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
-                    float dist_vtx1 = distance(vtxBox[i].x,vtxBox[(i+1)%4].y,vtxBox[(i+2)%4].x,vtxBox[(i+1)%4].y );
-                    if( dist_pts0 > 0.8*(dist_vtx0) && dist_pts1 > 0.8*(dist_vtx1)){
-                        side = i;
-                    }
-                }
-            }
-            //calc angle based on side
-            if(side == 0){
-                angle = angle + 90;
-            }else if(side == 1){
-                angle = angle + 180;
-            }else if(side == 2){
-                angle = angle + 270;
-            }
-        }else if(idxPiece == 2){ //N
-            Point2f vtxBox[4];
-            box.points(vtxBox);
-            vector<vector<Point>> points_by_side(4);
-            //points_by_side.resize(4);
-            int side = 3;
-            //seperate point by box side
-            for(int i = 0; i < 4; i++ ){
-                for (int j = 0; j < sample.size(); ++j)
-                {
-                    if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
-                    || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
-                        if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
-                        || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
-                            points_by_side[i].push_back(sample[j]);
-                        }
-                    }
-                }
-            }
-            //calc where the reference side are
-            for (int i = 0; i < points_by_side.size(); ++i)
-            {
-                if(points_by_side[i].size() == 2){
-                    float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
-                    float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
-                    if( dist_pts > 0.60*(dist_vtx)){
-                        side = i;
-                    }
-                }
-            }
-            //calc angle based on side
-            if(side == 0){
-                angle = angle + 90;
-            }else if(side == 1){
-                angle = angle + 180;
-            }else if(side == 2){
-                angle = angle + 270;
-            }
-        }else if(idxPiece == 3){ //P
-            Point2f vtxBox[4];
-            box.points(vtxBox);
-            vector<vector<Point>> points_by_side(4);
-            //points_by_side.resize(4);
-            int side = 3;
-            //seperate point by box side
-            for(int i = 0; i < 4; i++ ){
-                for (int j = 0; j < sample.size(); ++j)
-                {
-                    if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
-                    || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
-                        if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
-                        || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
-                            points_by_side[i].push_back(sample[j]);
-                        }
-                    }
-                }
-            }
-            //calc where the reference side are
-            for (int i = 0; i < points_by_side.size(); ++i)
-            {
-                if(points_by_side[i].size() == 2){
-                    float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
-                    float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
-                    if( dist_pts > 0.6*(dist_vtx) && dist_pts < 0.9*(dist_vtx)){
-                        side = i;
-                    }
-                }
-            }
-            //calc angle based on side
-            if(side == 0){
-                angle = angle + 90;
-            }else if(side == 1){
-                angle = angle + 180;
-            }else if(side == 2){
-                angle = angle + 270;
-            }
-        }else if(idxPiece == 4){ //U
-            Point2f vtxBox[4];
-            box.points(vtxBox);
-            vector<vector<Point>> points_by_side(4);
-            //points_by_side.resize(4);
-            int side = 1;
-            //seperate point by box side
-            for(int i = 0; i < 4; i++ ){
-                for (int j = 0; j < sample.size(); ++j)
-                {
-                    if(vtxBox[i].x <= vtxBox[(i+1)%4].x && sample[j].x > vtxBox[i].x - margin && sample[j].x < vtxBox[(i+1)%4].x + margin
-                    || vtxBox[i].x >= vtxBox[(i+1)%4].x && sample[j].x < vtxBox[i].x + margin && sample[j].x > vtxBox[(i+1)%4].x - margin){
-                        if(vtxBox[i].y <= vtxBox[(i+1)%4].y && sample[j].y > vtxBox[i].y - margin && sample[j].y < vtxBox[(i+1)%4].y + margin
-                        || vtxBox[i].y >= vtxBox[(i+1)%4].y && sample[j].y < vtxBox[i].y + margin && sample[j].y > vtxBox[(i+1)%4].y - margin){
-                            points_by_side[i].push_back(sample[j]);
-                        }
-                    }
-                }
-            }
-            //calc where the reference side are
-            for (int i = 0; i < points_by_side.size(); ++i)
-            {
-                if(points_by_side[i].size() == 4){
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.60*(dist_vtx)){
                     side = i;
                 }
             }
-            //calc angle based on side
-            if(side == 0){
-                angle = angle + 270;
-            }else if(side == 2){
-                angle = angle + 90;
-            }else if(side == 3){
-                angle = angle + 180;
-            }
-        }else if(idxPiece == 5){ //X
-            angle = ang - angT;
         }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 270;
+        }else if(side == 2){
+            angle = angle + 90;
+        }else if(side == 3){
+            angle = angle + 180;
+        }
+
+    }else if(idxPiece == 1){ //V
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size() - 1; ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts0 = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_pts1 = distance(points_by_side[i+1][0].x,points_by_side[i+1][0].y,points_by_side[i+1][1].x,points_by_side[i+1][1].y );
+                float dist_vtx0 = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                float dist_vtx1 = distance(vtxBox[i].x,vtxBox[(i+1)%4].y,vtxBox[(i+2)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts0 > 0.8*(dist_vtx0) && dist_pts1 > 0.8*(dist_vtx1)){
+                    side = i;
+                }
+            }
+        }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 2){ //N
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.60*(dist_vtx)){
+                    side = i;
+                }
+            }
+        }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 3){ //P
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_vtx = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts > 0.6*(dist_vtx) && dist_pts < 0.9*(dist_vtx)){
+                    side = i;
+                }
+            }
+        }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
+    }else if(idxPiece == 4){ //U
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 1;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size(); ++i)
+        {
+            if(points_by_side[i].size() == 4){
+                side = i;
+            }
+        }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 270;
+        }else if(side == 2){
+            angle = angle + 90;
+        }else if(side == 3){
+            angle = angle + 180;
+        }
+    }else if(idxPiece == 5){ //X
+        angle = ang - angT;
+    }
+
 
         
         Point point_rotate = rotatePointOrigin(point_grab[idxPiece], angle );

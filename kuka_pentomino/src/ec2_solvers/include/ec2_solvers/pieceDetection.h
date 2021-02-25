@@ -19,6 +19,7 @@ namespace ec2{
         bool categorizeAndDetect(std::vector<cv::Mat> templates, std::vector<cv::Point> sample, char &piece, double &angle, cv::Point &pointPiece);
         cv::Point rotatePointOrigin(cv::Point p, double ang);
         std::vector<cv::Point> imagePieceToContours(cv::Mat image);
+        bool checkPointInside(cv::Point pP, cv::Point pA, cv::Point pB);
     };
 }
 
