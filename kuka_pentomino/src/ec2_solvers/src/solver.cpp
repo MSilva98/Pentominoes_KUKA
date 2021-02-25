@@ -383,11 +383,12 @@ namespace ec2
             getBasePosFromPixel(piecesCenterRight[i], tmp, modelPT);
             detectedPiecesPT.push_back(tmp);
         }   
-
+        
         ROS_INFO("Searching for inner corner of play area frame...");
         // Detect inner corner from play area frame
         Point2d innerCorner;
-        pieceDetect.findPlayframe(color, innerCorner);
+        Mat template_R = imread("templates/templateRight.png", IMREAD_GRAYSCALE);
+        pieceDetect.findPlayframe(template_R, innerCorner);
         getBasePosFromPixel(innerCorner, playFramePos, modelPT);
 
         // Only check left side of table if less than 6 points detected
