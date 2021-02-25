@@ -383,7 +383,7 @@ namespace ec2
             getBasePosFromPixel(piecesCenterRight[i], tmp, modelPT);
             detectedPiecesPT.push_back(tmp);
         }   
-
+        
         ROS_INFO("Searching for inner corner of play area frame...");
         // Detect inner corner from play area frame
         Point2d innerCorner;
