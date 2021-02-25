@@ -493,14 +493,25 @@ namespace ec2
                 cout << "Categorize Pieces" << endl;
                 contours_image = pieceDetect.imagePieceToContours(color);
                 bool status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
-                // double current_yaw = 0.2;
                 //rotate robot until recognize the piece
-                // while(!status){
-                //     current_yaw = current_yaw + M_PI/5;
-                //     lookAt(posP5[j], 0, current_yaw, true);
-                //     contours_image = pieceDetect.imagePieceToContours(color, output);
-                //     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
-                // }
+                while(!status){
+                    cout << "Try Categorize Piece Again" << endl;
+                    bool statusPose = false;
+                    while(not statusPose){
+                        yaw += M_PI/2;
+                        if(yaw >= M_PI*2)   // M_PI*2 = 360º
+                            break;
+                        statusPose = lookAt(posP5[j], yaw, 0.2, true);
+                    }
+                    ros::Duration(1.0).sleep();
+                    getDataFromTCP(color, depth, modelTCP, true);
+                    name = "tempImages/Piece"+to_string(j)+".png";
+                    cvtColor(color, color, CV_BGR2RGB);
+                    // imshow(name, color);
+                    imwrite(name, color);
+                    contours_image = pieceDetect.imagePieceToContours(color);
+                    status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
+                }
                 cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
                 angle = 360-angle;          // convert to counter clockwise
                 angle = angle*(M_PI/180);   // convert to radians
