@@ -12,14 +12,14 @@ namespace ec2{
     vector<tuple <char, int, int, double>> puzzle::getSolution(){
 
         vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
-        vector<vector<char> > game_sol  = readMatrixFromFile("sol1-pentamino.txt", 6, 5);
+        vector<vector<char> > game_sol  = readMatrixFromFile("sol2-pentamino.txt");
         vector<vector<vector<char> >> pieces_temps; 
-        pieces_temps.push_back(readMatrixFromFile("templates/f_matrix_template.txt", 3, 3));
-        pieces_temps.push_back(readMatrixFromFile("templates/v_matrix_template.txt", 3, 3));
-        pieces_temps.push_back(readMatrixFromFile("templates/n_matrix_template.txt", 4, 2));
-        pieces_temps.push_back(readMatrixFromFile("templates/p_matrix_template.txt", 3, 2));
-        pieces_temps.push_back(readMatrixFromFile("templates/u_matrix_template.txt", 3, 2));
-        pieces_temps.push_back(readMatrixFromFile("templates/x_matrix_template.txt", 3, 3));
+        pieces_temps.push_back(readMatrixFromFile("templates/f_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/v_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/n_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/p_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/u_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/x_matrix_template.txt"));
 
         vector<tuple <char, int, int, double>> sol_positions; // pieceType, idxRows, idxCols, angle
 
@@ -233,21 +233,19 @@ namespace ec2{
 
 
     vector<vector<char>> puzzle::readMatrixFromFile(string name_file, int rows, int cols ){
-        vector<vector<char> > v(rows,vector<char>(cols));
-
-        ifstream fp(name_file);
-        if (! fp) {
-            cout << "Error, file couldn't be opened" << endl; 
-        }    
-        for(int row = 0; row <  v.size(); row++) {  // stop loops if nothing to read
-        for(int column = 0; column < v[row].size(); column++){
-                fp >> v[row][column];
-                if ( ! fp ) {
-                cout << "Error reading file for element " << row << "," << column << endl; 
+        vector<vector<char> > v;
+        std::ifstream file(name_file);
+        if (file.is_open()) {
+            std::string line;
+            while (std::getline(file, line)) {
+                vector<char> temp;
+                for (int i = 0; i < line.size(); i++) {
+                    temp.push_back(line[i]);
                 }
+                v.push_back(temp);
             }
+            file.close();
         }
-        fp.close();
         return v;
     } 
 }
