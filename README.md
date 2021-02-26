@@ -25,7 +25,7 @@ rosrun ec2_solvers solver
 ```
 
 ## IMPORTANT NOTES
-- In **grasp** function in **gripper_interface.cpp**, the **move_msg.request.position** parameter must be **0.0335**
+- In **grasp** function in **gripper_interface.cpp**, the **move_msg.request.position** parameter must be **0.03515**
 - The **setTCPPose** in **arm_interface.cpp**, must have the following if condition between **gik.response.error_message** if condition and **gik.response.joint_position.values[6]** attribution.
 ```
 if(gik.response.joint_position.values.size() <= 0){

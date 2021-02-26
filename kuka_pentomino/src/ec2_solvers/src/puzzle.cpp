@@ -232,7 +232,7 @@ namespace ec2{
     }
 
 
-    vector<vector<char>> puzzle::readMatrixFromFile(string name_file, int rows, int cols ){
+    vector<vector<char>> puzzle::readMatrixFromFile(string name_file){
         vector<vector<char> > v;
         std::ifstream file(name_file);
         if (file.is_open()) {

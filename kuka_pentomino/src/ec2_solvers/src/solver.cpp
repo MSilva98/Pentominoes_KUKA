@@ -276,9 +276,9 @@ namespace ec2
             for(size_t j = 0; j < posP5.size(); j++){
                 if(i!=j){
                     d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
-                    //cout << "dist: " << d << "I: " << posP5[i].transpose() << "J: " << posP5[j].transpose() << endl;
+                    cout << "dist: " << d << "I: " << posP5[i].transpose() << "J: " << posP5[j].transpose() << endl;
                     if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
-                        //cout << "Close Points!" << endl;
+                        cout << "Close Points!" << endl;
                         posP5.erase(posP5.begin()+j);
                     }    
                 }    
@@ -352,22 +352,20 @@ namespace ec2
         pieceDetect.findPlayframe(imread("templates/templateRight.png", IMREAD_GRAYSCALE), innerCorner);
         getBasePosFromPixel(innerCorner, playFramePos, modelPT);
 
-        // Only check left side of table if less than 6 points detected
-        if(detectedPiecesPT.size() < 6){
-            ROS_INFO("Searching pieces on the left side of table...");
-            // Look for pieces in the left side of table with Pan Tilt Cam
-            vector<Point2d> piecesCenterLeft; 
-            setPT(1.5, -1.1);
-            // Sleep 0.8 seconds
-            ros::Duration(0.8).sleep();        
-            getDataFromPT(color, depth, modelPT, true);   // format BGR
-            cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
-            pieceDetect.findPiecesPT(imread("templates/templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "leftPT");
-            for(size_t i = 0; i < piecesCenterLeft.size(); i++){
-                getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
-                detectedPiecesPT.push_back(tmp);
-            }
+        ROS_INFO("Searching pieces on the left side of table...");
+        // Look for pieces in the left side of table with Pan Tilt Cam
+        vector<Point2d> piecesCenterLeft; 
+        setPT(1.5, -1.1);
+        // Sleep 0.8 seconds
+        ros::Duration(0.8).sleep();        
+        getDataFromPT(color, depth, modelPT, true);   // format BGR
+        cvtColor(color, color, CV_BGR2RGB); // Convert to RGB
+        pieceDetect.findPiecesPT(imread("templates/templateLeft.png", IMREAD_COLOR), color, piecesCenterLeft, "leftPT");
+        for(size_t i = 0; i < piecesCenterLeft.size(); i++){
+            getBasePosFromPixel(piecesCenterLeft[i], tmp, modelPT);
+            detectedPiecesPT.push_back(tmp);
         }
+        
         // Remove close points (points that belong to same piece)
         // Prevents unnecessary visits to pieces
         removeClosePoints(detectedPiecesPT);
