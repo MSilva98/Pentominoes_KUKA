@@ -267,7 +267,7 @@ namespace ec2
         // cout << "Vector Base: " << VBase.transpose() << "\nCamera pos: " << posCam.transpose() << endl;
         double scalar = (Z-posCam.z())/VBase.z();    
         pos = posCam + scalar*VBase;
-        cout << "Pixel: " << pixel << " Corresponding 3d Point: " << pos.transpose() << endl;
+        //cout << "Pixel: " << pixel << " Corresponding 3d Point: " << pos.transpose() << endl;
     }
 
     void Solver::removeClosePoints(vector<Eigen::Vector3d> &posP5){
@@ -276,9 +276,9 @@ namespace ec2
             for(size_t j = 0; j < posP5.size(); j++){
                 if(i!=j){
                     d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
-                    cout << "dist: " << d << "I: " << posP5[i].transpose() << "J: " << posP5[j].transpose() << endl;
+                    //cout << "dist: " << d << "I: " << posP5[i].transpose() << "J: " << posP5[j].transpose() << endl;
                     if(d <= 0.1){   // MAIS TESTES PARA VERIFICAR ISTO
-                        cout << "Close Points!" << endl;
+                        //cout << "Close Points!" << endl;
                         posP5.erase(posP5.begin()+j);
                     }    
                 }    
@@ -378,7 +378,7 @@ namespace ec2
         bool ok;
         for(size_t i = 0; i < detectedPiecesPT.size(); i++){
             detectedPiecesPT[i].z() = 0.2;
-            cout << "Detected pieces at: " << detectedPiecesPT[i].transpose() << endl;
+            //cout << "Detected pieces at: " << detectedPiecesPT[i].transpose() << endl;
             // rotate until it's possible to reach position
             // if 360º rotation then skip position
             yaw = 0;
@@ -414,7 +414,7 @@ namespace ec2
 
         // Remove close points (points that belong to same piece)
         removeClosePoints(posP5);
-        cout << "REMAINING POINTS: " << posP5.size() << endl;
+        //cout << "REMAINING POINTS: " << posP5.size() << endl;
 
         ROS_INFO("Reading and recognizing each piece individually and its grasp point...");
         vector<Mat> templates{
@@ -432,7 +432,7 @@ namespace ec2
         vector<tuple<char, double, Eigen::Vector3d>> grabPos;        
         // Send arm to position of each piece and capture it
         for (size_t j = 0; j < posP5.size(); j++){
-            cout << "P5 pos: " << posP5[j].transpose() << endl;
+            //cout << "P5 pos: " << posP5[j].transpose() << endl;
             // rotate until it's possible to reach position
             // if 360º rotation then skip position
             yaw = 0;
@@ -471,7 +471,8 @@ namespace ec2
                     contours_image = pieceDetect.imagePieceToContours(color);
                     status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
                 }
-                cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
+                ROS_INFO("Recognize piece %c with an angle of %0.2f", piece, angle);
+                //cout << j << " RECOGNIZE PIECE  " << piece << " Ang "<< angle << " Point - "<< pointPiece << endl;
                 angle = 360-angle;          // convert to counter clockwise
                 angle = angle*(M_PI/180);   // convert to radians
                 angle += yaw;
@@ -488,21 +489,25 @@ namespace ec2
         double x_final_pos_puzzle, y_final_pos_puzzle;
         std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution();
         for(size_t i = 0; i < solution.size(); i++){
+            bool status_grab;
             for (size_t j = 0; j < grabPos.size(); j++){
                 if(get<0>(solution[i]) == get<0>(grabPos[j])){
-                    cout << "Grab Piece: " << get<0>(grabPos[j]) << " at angle: " << get<1>(grabPos[j]) << " and pos: " << get<2>(grabPos[j]).transpose() << endl;
-                    setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
-                    grabPiece(0.01, 0.1, 120);
+                    status_grab = setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
                 }
-            }        
-            x_final_pos_puzzle = -(get<1>(solution[i])*0.0358)+0.0065;
-            y_final_pos_puzzle = -(get<2>(solution[i])*0.0358)-0.025;
-            piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.17);
-            angle = ((360-get<3>(solution[i]))*(M_PI/180))+yaw;
-            cout << "Piece solution: " << get<0>(solution[i]) << " at angle: " << angle << " and pos: " <<  piece_final_pos.transpose() << endl;
-            setGripper(piece_final_pos, angle, 0.2);
-            cout << "Drop piece in place"<< endl;
-            releasePiece(0.01, 0.1, 80);
+            }
+            if(status_grab){
+                ROS_INFO("Grab piece %c", get<0>(solution[i]));
+                grabPiece(0.01, 0.1, 120);
+                x_final_pos_puzzle = -(get<1>(solution[i])*0.0358)+0.0065;
+                y_final_pos_puzzle = -(get<2>(solution[i])*0.0358)-0.025;
+                piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.17);
+                angle = ((360-get<3>(solution[i]))*(M_PI/180))+yaw;
+                setGripper(piece_final_pos, angle, 0.2);
+                ROS_INFO("Drop piece %c in place", get<0>(solution[i]));
+                releasePiece(0.01, 0.1, 80);
+            }else{
+                ROS_WARN("Arm can't reach piece: %c", get<0>(solution[i]));
+            }    
         }
         ROS_INFO("Pentominoes Puzzle Finished");
         resetArm();
