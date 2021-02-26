@@ -421,7 +421,8 @@ namespace ec2
             imread("templates/N.png", IMREAD_GRAYSCALE),
             imread("templates/P.png", IMREAD_GRAYSCALE),
             imread("templates/U.png", IMREAD_GRAYSCALE),
-            imread("templates/X.png", IMREAD_GRAYSCALE)
+            imread("templates/X.png", IMREAD_GRAYSCALE),
+            imread("templates/L.png", IMREAD_GRAYSCALE)
         };
         char piece; 
         double angle; 

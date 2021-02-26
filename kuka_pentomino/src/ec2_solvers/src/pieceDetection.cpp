@@ -193,8 +193,8 @@ namespace ec2{
 
     bool pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
         
-        vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
-        vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0};
+        vector<char> names{'F', 'V', 'N', 'P', 'U', 'X', 'L'};
+        vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0, 90};
 
         //default points to grab
         vector<Point> point_grab;
@@ -204,6 +204,7 @@ namespace ec2{
         point_grab.push_back(Point(-200, -100)); // P 90
         point_grab.push_back(Point(0, 115));    // U 90
         point_grab.push_back(Point(0, -200));   // X 0
+        point_grab.push_back(Point(100, 100));   // L 0
 
         //Get vx, perimeter and minAreaRect - sample
         int vx = sample.size();
@@ -446,6 +447,42 @@ namespace ec2{
         }
     }else if(idxPiece == 5){ //X
         angle = ang - angT;
+    }else if(idxPiece == 6){ //L
+        Point2f vtxBox[4];
+        box.points(vtxBox);
+        vector<vector<Point>> points_by_side(4);
+        //points_by_side.resize(4);
+        int side = 3;
+        //seperate point by box side
+        for(int i = 0; i < 4; i++ ){
+            for (int j = 0; j < sample.size(); ++j)
+            {
+                if(checkPointInside(sample[j], vtxBox[i], vtxBox[(i+1)%4])){
+                    points_by_side[i].push_back(sample[j]);
+                }
+            }
+        }
+        //calc where the reference side are
+        for (int i = 0; i < points_by_side.size() - 1; ++i)
+        {
+            if(points_by_side[i].size() == 2){
+                float dist_pts0 = distance(points_by_side[i][0].x,points_by_side[i][0].y,points_by_side[i][1].x,points_by_side[i][1].y );
+                float dist_pts1 = distance(points_by_side[i+1][0].x,points_by_side[i+1][0].y,points_by_side[i+1][1].x,points_by_side[i+1][1].y );
+                float dist_vtx0 = distance(vtxBox[i].x,vtxBox[i].y,vtxBox[(i+1)%4].x,vtxBox[(i+1)%4].y );
+                float dist_vtx1 = distance(vtxBox[i].x,vtxBox[(i+1)%4].y,vtxBox[(i+2)%4].x,vtxBox[(i+1)%4].y );
+                if( dist_pts0 > 0.8*(dist_vtx0) && dist_pts1 > 0.8*(dist_vtx1)){
+                    side = i;
+                }
+            }
+        }
+        //calc angle based on side
+        if(side == 0){
+            angle = angle + 90;
+        }else if(side == 1){
+            angle = angle + 180;
+        }else if(side == 2){
+            angle = angle + 270;
+        }
     }
 
 
