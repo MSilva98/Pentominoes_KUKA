@@ -8,8 +8,7 @@ namespace ec2{
     class pieceDetection
     {
     public:
-        // void getPiecesAvgCenter(cv::Mat frame, cv::Point2d &center);
-        void findPiecesPT(cv::Mat templ, cv::Mat frame, std::vector<cv::Point2d> &center, std::string name);
+        void findPiecesPT(cv::Mat templ, cv::Mat frame, std::vector<cv::Point2d> &center);
         void getPiecesCenter(cv::Mat frame, std::vector<cv::Point2d> &center);
         void findPlayframe(cv::Mat image, cv::Point2d &innerCorner);
         cv::Mat rotate(cv::Mat src, double angle);

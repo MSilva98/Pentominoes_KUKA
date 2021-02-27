@@ -66,20 +66,6 @@ namespace ec2{
             }
         }
 
-        // vector<double> angleToGrabTemp{0, 90, 90, 90, 90, 0};
-
-        // for (size_t i = 0; i < sol_positions.size(); i++)
-        // {
-        //     for (size_t j = 0; i < names.size(); i++)
-        //     {
-        //         if(get<0>(sol_positions[i]) == names[j]){
-        //             double new_ang = get<3>(sol_positions[i]) - angleToGrabTemp[j];
-        //             sol_positions[i] = tuple <char, int, int, double>(get<0>(sol_positions[i]), get<1>(sol_positions[i]), get<2>(sol_positions[i]),angle );
-        //         }
-        //     }
-        // }
-        
-
         //order
         sol_positions = orderByDistance(sol_positions);
 

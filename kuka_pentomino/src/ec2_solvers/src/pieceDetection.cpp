@@ -8,8 +8,9 @@ using namespace std;
 using namespace cv;
 
 namespace ec2{
-    void pieceDetection::findPiecesPT(Mat templ, Mat frame, vector<Point2d> &piecesCenter, string name){
-        Mat diff, image, output = Mat::zeros(frame.size(), CV_8UC3);
+    // Get mid-points of objetcs found in Mat frame after removing what is common in Mat templ and Mat frame
+    void pieceDetection::findPiecesPT(Mat templ, Mat frame, vector<Point2d> &piecesCenter){
+        Mat diff, image;
         // Remove background including table and black frame
         bitwise_xor(templ, frame, diff);
         medianBlur(diff, diff, 3);
@@ -28,29 +29,17 @@ namespace ec2{
         Point2d center;
         for( size_t i = 0; i < contours.size(); i++ ){
             if(contours[i].size() > 55){
-                drawContours(output, contours, i, Scalar(255,255,255), CV_FILLED);
                 Rect br = boundingRect(contours[i]);
                 center = Point2d(br.x+br.width/2, br.y+br.height/2);
                 piecesCenter.push_back(center);
-                output.at<Vec3b>(center.y, center.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y+1, center.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y-1, center.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y, center.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y, center.x-1) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y+1, center.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y+1, center.x-1) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y-1, center.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
             }
         }
-        imwrite("tempImages/"+name+".png", output);
-        imwrite("tempImages/"+name+"_orig.png", frame);
-
     }
 
+    // Very similar to previous function but is intended to have a clear top view of each object, making it easier to detect
     void pieceDetection::getPiecesCenter(Mat frame, vector<Point2d> &piecesCenter){
         cvtColor(frame, frame, CV_BGR2GRAY);
-        Mat thresholdImage, output = Mat::zeros(frame.size(), CV_8UC3);
+        Mat thresholdImage;
         //Apply canny to the input image
         Canny(frame, thresholdImage, 20, 28, 3);
         // Apply dilation followed by erosion
@@ -73,25 +62,15 @@ namespace ec2{
             }
         }
         for( size_t i = 0; i < contours2.size(); i++ ){
-            drawContours(output, contours2, i, Scalar(255,255,255), CV_FILLED);
             Rect br = boundingRect(contours2[i]);
             center = Point2d(br.x+br.width/2, br.y+br.height/2);
             piecesCenter.push_back(center);
-            output.at<Vec3b>(center.y, center.x) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y+1, center.x-1) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y-1, center.x+1) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y+1, center.x+1) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y-1, center.x-1) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y+1, center.x) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y-1, center.x) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y, center.x+1) = Vec3b(0,0,255);
-            output.at<Vec3b>(center.y, center.x-1) = Vec3b(0,0,255);
         }
-        imwrite("tempImages/pieceCenter_"+to_string(center.x)+".png", output);
     }
 
+    // One more object detection function but with the goal of detecting just one large object (The play frame black L in this case)
     void pieceDetection::findPlayframe(Mat image, Point2d &innerCorner){
-        Mat thresholdImage, output = Mat::zeros(image.size(),CV_8UC3);
+        Mat thresholdImage;
         medianBlur(image,image,7);
         Canny(image, thresholdImage, 255, 255, 3);
         morphologyEx(thresholdImage, image, MORPH_CLOSE, Mat::ones(8,8, CV_32F));
@@ -114,7 +93,6 @@ namespace ec2{
         double d, d1, x, y;
         for( size_t i = 0; i < contours2.size(); i++ ){
             if(arcLength(contours2[i], true) > 400){
-                drawContours(output, contours2, i, Scalar(255,255,255), CV_FILLED);
                 Rect br = boundingRect(contours2[i]);
                 x = (br.x+br.width/2);
                 y = (br.y+br.height/2);
@@ -127,22 +105,13 @@ namespace ec2{
                         innerCorner = contours2[i][j];
                     }
                 }
-                output.at<Vec3b>(innerCorner.y, innerCorner.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y+1, innerCorner.x-1) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y-1, innerCorner.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y+1, innerCorner.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y-1, innerCorner.x-1) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y+1, innerCorner.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y-1, innerCorner.x) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y, innerCorner.x+1) = Vec3b(0,0,255);
-                output.at<Vec3b>(innerCorner.y, innerCorner.x-1) = Vec3b(0,0,255);
             }
         }
-        imwrite("tempImages/PLAYFRAME.png", output);
     }
 
+    // Get contours of objects in Mat image
     vector<Point> pieceDetection::imagePieceToContours(Mat image){
-        Mat thresholdedImage, img, output = Mat::zeros( image.size(), CV_8UC3 );
+        Mat thresholdedImage, img;
         //Apply canny to the input image
         Canny(image, thresholdedImage, 50, 255, 5);
 
@@ -173,24 +142,16 @@ namespace ec2{
                 idx = i;
             }
         }
-
-
-        // Draw contours.
-        Scalar color = Scalar( 255, 255, 255 );
-        drawContours(output, contours, idx, color, CV_FILLED);
-        for( int j = 0; j< contours[idx].size(); j++ ){
-            Point pt = contours[idx][j];
-        }
-
         return contours[idx];
     }
 
+    // Check if point is inside of area
     bool pieceDetection::checkPointInside(Point pP, Point pA, Point pB){
         double margin = 20;
-        //cout << " d1 " << distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) << " d2 " << distance(pA.x, pA.y, pB.x, pB.y) << endl;
         return (distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) > distance(pA.x, pA.y, pB.x, pB.y) - margin) && (distance(pA.x, pA.y, pP.x, pP.y) + distance(pB.x, pB.y, pP.x, pP.y) < distance(pA.x, pA.y, pB.x, pB.y) + margin);
     }
 
+    // Detect and classify each pentomino, IN ORDER TO DETECT OTHER PENTOMINOS, THE RESPECTIVE CODE MUST BE ADDED HERE
     bool pieceDetection::categorizeAndDetect(vector<Mat> templates, vector<Point> sample, char &piece, double &angle, Point &pointPiece){
         
         vector<char> names{'F', 'V', 'N', 'P', 'U', 'X', 'L'};
@@ -512,10 +473,7 @@ namespace ec2{
         Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
         // determine bounding rectangle, center not relevant
         Rect2f bbox = cv::RotatedRect(cv::Point2f(), src.size(), angle).boundingRect2f();
-        // adjust transformation matrix
-        //rot.at<double>(0,2) += bbox.width/2.0 - src.cols/2.0;
-        //rot.at<double>(1,2) += bbox.height/2.0 - src.rows/2.0;
-
+        
         Mat dst;
         warpAffine(src, dst, rot, src.size());
         return dst;         //returning Mat object for output image file
