@@ -457,7 +457,7 @@ namespace ec2
                     ROS_INFO("Failed to classify. \nTrying Categorize Piece Again");
                     bool statusPose = false;
                     while(not statusPose){
-                        yaw += M_PI/2;
+                        yaw += M_PI_2;
                         if(yaw >= M_PI*2)   // M_PI*2 = 360º
                             break;
                         statusPose = lookAt(posP5[j], yaw, 0.2, true);
@@ -500,7 +500,7 @@ namespace ec2
                 x_final_pos_puzzle = -(get<1>(solution[i])*0.0358)+0.0065;
                 y_final_pos_puzzle = -(get<2>(solution[i])*0.0358)-0.025;
                 piece_final_pos = playFramePos + Eigen::Vector3d( x_final_pos_puzzle, y_final_pos_puzzle, 0.17);
-                angle = ((360-get<3>(solution[i]))*(M_PI/180))+yaw;
+                angle = ((360-get<3>(solution[i]))*(M_PI/180));
                 setGripper(piece_final_pos, angle, 0.2);
                 ROS_INFO("Drop piece %c in place", get<0>(solution[i]));
                 releasePiece(0.01, 0.1, 80);

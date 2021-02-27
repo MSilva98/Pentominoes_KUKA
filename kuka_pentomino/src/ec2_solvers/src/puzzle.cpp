@@ -11,7 +11,7 @@ namespace ec2{
 
     vector<tuple <char, int, int, double>> puzzle::getSolution(){
 
-        vector<char> names{'F', 'V', 'N', 'P', 'U', 'X'};
+        vector<char> names{'F', 'V', 'N', 'P', 'U', 'X', 'L'};
         vector<vector<char> > game_sol  = readMatrixFromFile("sol2-pentamino.txt");
         vector<vector<vector<char> >> pieces_temps; 
         pieces_temps.push_back(readMatrixFromFile("templates/f_matrix_template.txt"));
@@ -20,43 +20,48 @@ namespace ec2{
         pieces_temps.push_back(readMatrixFromFile("templates/p_matrix_template.txt"));
         pieces_temps.push_back(readMatrixFromFile("templates/u_matrix_template.txt"));
         pieces_temps.push_back(readMatrixFromFile("templates/x_matrix_template.txt"));
+        pieces_temps.push_back(readMatrixFromFile("templates/l_matrix_template.txt"));
 
         vector<tuple <char, int, int, double>> sol_positions; // pieceType, idxRows, idxCols, angle
+
+        vector<char> piecesUsed = getPiecesUsed( game_sol);
 
         //iterate pieces
         for (int pieceIdx = 0; pieceIdx < pieces_temps.size(); ++pieceIdx)
         {
-            vector<vector<char>> piece_arr = pieces_temps[pieceIdx];
-            //cout << "TRY PIECE " << names[pieceIdx] << endl;
-            bool status = true;
-            int count = 0;
-            double angle = 0;
-            while(status){
-                for (int i = 0; i < game_sol.size() - piece_arr.size() + 1; ++i)
-                {
-                    for (int j = 0; j < game_sol[0].size() - piece_arr[0].size() + 1; ++j)
+            if(charInVector(piecesUsed,names[pieceIdx])){
+                vector<vector<char>> piece_arr = pieces_temps[pieceIdx];
+                //cout << "TRY PIECE " << names[pieceIdx] << endl;
+                bool status = true;
+                int count = 0;
+                double angle = 0;
+                while(status){
+                    for (int i = 0; i < game_sol.size() - piece_arr.size() + 1; ++i)
                     {
-                        vector<vector<char>> game_sub_arr = getSubArray(game_sol,i,j,piece_arr.size(), piece_arr[0].size());
-                        if(matchArrayPiece(game_sub_arr,piece_arr,names[pieceIdx])){
-                            //cout << "PIECE " << names[pieceIdx] << " RECOGNIZED AT " << i << ", " << j << endl;
-                            tuple<int, int> pos = getPointGrasp(piece_arr, names[pieceIdx] );
-                            sol_positions.push_back(make_tuple(names[pieceIdx], get<0>(pos) + i, get<1>(pos) + j, angle));
-                            status = false;
+                        for (int j = 0; j < game_sol[0].size() - piece_arr[0].size() + 1; ++j)
+                        {
+                            vector<vector<char>> game_sub_arr = getSubArray(game_sol,i,j,piece_arr.size(), piece_arr[0].size());
+                            if(matchArrayPiece(game_sub_arr,piece_arr,names[pieceIdx])){
+                                //cout << "PIECE " << names[pieceIdx] << " RECOGNIZED AT " << i << ", " << j << endl;
+                                tuple<int, int> pos = getPointGrasp(piece_arr, names[pieceIdx] );
+                                sol_positions.push_back(make_tuple(names[pieceIdx], get<0>(pos) + i, get<1>(pos) + j, angle));
+                                status = false;
+                                break;
+                            }
+                        }
+                        if(!status){
                             break;
                         }
                     }
-                    if(!status){
+                    //if dont match rotate piece and repeat
+                    if(status){
+                        piece_arr = rotate90clockwise(piece_arr);
+                        angle = angle + 90;
+                        count++;
+                    }
+                    if(count > 3){
                         break;
                     }
-                }
-                //if dont match rotate piece and repeat
-                if(status){
-                    piece_arr = rotate90clockwise(piece_arr);
-                    angle = angle + 90;
-                    count++;
-                }
-                if(count > 3){
-                    break;
                 }
             }
         }
@@ -79,6 +84,30 @@ namespace ec2{
         sol_positions = orderByDistance(sol_positions);
 
         return sol_positions;
+    }
+
+    bool puzzle::charInVector(vector<char> v, char c){
+        for (int i = 0; i < v.size(); ++i)
+        {
+            if(v[i] == c){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    vector<char> puzzle::getPiecesUsed(vector<vector<char> > game_sol){
+        vector<char> result;
+        for (int i = 0; i < game_sol.size(); ++i)
+        {
+            for (int j = 0; j < game_sol[i].size(); ++j)
+            {
+                if(!charInVector(result, game_sol[i][j])){
+                    result.push_back(game_sol[i][j]);
+                }
+            }
+        }
+        return result;
     }
 
     vector<tuple <char, int, int, double>> puzzle::orderByDistance(vector<tuple <char, int, int, double>> vec){
@@ -188,6 +217,18 @@ namespace ec2{
                 {
                     if(arrPiece[i][j] == 'x' || arrPiece[i][j] == 'X' ){
                         if(arrGame[i][j] != 'X' ){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }else if(typePiece == 'L'){
+            for (int i = 0; i < arrPiece.size(); ++i)
+            {
+                for (int j = 0; j < arrPiece[0].size(); ++j)
+                {
+                    if(arrPiece[i][j] == 'l' || arrPiece[i][j] == 'L' ){
+                        if(arrGame[i][j] != 'L' ){
                             return false;
                         }
                     }

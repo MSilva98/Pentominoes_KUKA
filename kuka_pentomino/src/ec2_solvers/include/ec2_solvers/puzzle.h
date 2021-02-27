@@ -10,6 +10,8 @@ namespace ec2{
     class puzzle
     {
     public:
+        bool charInVector(std::vector<char> v, char c);
+        std::vector<char> getPiecesUsed(std::vector<std::vector<char> > game_sol);
         std::vector<std::vector<char>> readMatrixFromFile(std::string name_file);
         std::vector<std::vector<char>> rotate90clockwise(std::vector<std::vector<char>> temp);
         std::vector<std::vector<char>> getSubArray(std::vector<std::vector<char>> arr, int idxRow, int idxCol, int rows, int cols);
