@@ -10,7 +10,7 @@ using namespace cv;
 void getPiecesCenter(Mat &frame, Mat &thresholdImage, Mat &output, int run);
 
 int main(){
-    Mat frame1 = imread("top_image_0.png", IMREAD_GRAYSCALE);
+    Mat frame1 = imread("w_top.png", IMREAD_GRAYSCALE);
     Mat frame2 = imread("top_image_1.png", IMREAD_GRAYSCALE);
     Mat frame3 = imread("top_image_2.png", IMREAD_GRAYSCALE);
     Mat frame4 = imread("top_image_3.png", IMREAD_GRAYSCALE);
@@ -94,11 +94,11 @@ void getPiecesCenter(Mat &frame, Mat &thresholdImage, Mat &output, int run){
     double epsilon;
     vector<Point> tmp;
     for( size_t i = 0; i < contours.size(); i++ ){
-        if(contourArea(contours[i]) > 60000 && arcLength(contours[i], true) < 2000){
+        // if(contourArea(contours[i]) > 60000 && arcLength(contours[i], true) < 2000){
             epsilon = 0.01*arcLength(contours[i], true);
             approxPolyDP(contours[i], tmp, epsilon, true);
             contours2.push_back(tmp);
-        }
+        // }
     }
     Point center;
     for( size_t i = 0; i < contours2.size(); i++ ){

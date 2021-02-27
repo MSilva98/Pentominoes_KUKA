@@ -204,7 +204,7 @@ bool ArmInterface::setTCPPose(const Eigen::Affine3d& pose, double velocity, bool
     }
     
     if(gik.response.joint_position.values.size() <= 0){
-        ROS_ERROR("ArmInterface: Joint Position Values Vector size: %d", gik.response.joint_position.values.size());
+        ROS_WARN("ArmInterface: Joint Position Values Vector size: %d", gik.response.joint_position.values.size());
         return false;
     }
     /* Now move the arm */

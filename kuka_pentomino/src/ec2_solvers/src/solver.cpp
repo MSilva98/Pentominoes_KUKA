@@ -278,8 +278,7 @@ namespace ec2
             for(size_t j = 0; j < posP5.size(); j++){
                 if(i!=j){
                     d = sqrt(pow(posP5[j].x()-posP5[i].x(), 2)+pow(posP5[j].y()-posP5[i].y(), 2)*1.0);
-                    if(d <= 0.05){
-                        cout << "Points removes: " << posP5[i].transpose() << posP5[j].transpose() << endl;
+                    if(d <= 0.1){
                         posP5.erase(posP5.begin()+j);
                     }    
                 }    
@@ -398,6 +397,7 @@ namespace ec2
             if(ok){
                 ros::Duration(1.0).sleep();
                 getDataFromTCP(color, depth, modelTCP, true);
+
                 // Get center point of each piece detected from TOP VIEW
                 vector<Point2d> piecesCenter;
                 pieceDetect.getPiecesCenter(color, piecesCenter);
@@ -459,7 +459,7 @@ namespace ec2
                 bool status = pieceDetect.categorizeAndDetect(templates, contours_image, piece, angle , pointPiece);
                 // Rotate robot until recognize the piece
                 while(!status){
-                    ROS_INFO("Failed to classify. \nTrying Categorize Piece Again");
+                    ROS_INFO("Failed to classify. Trying to Categorize Piece in different angle");
                     statusPose = false;
                     broken = false;
                     while(not statusPose){

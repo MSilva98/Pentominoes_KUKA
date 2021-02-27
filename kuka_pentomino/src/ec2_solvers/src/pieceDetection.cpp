@@ -28,7 +28,7 @@ namespace ec2{
 
         Point2d center;
         for( size_t i = 0; i < contours.size(); i++ ){
-            if(contours[i].size() > 55){
+            if(contours[i].size() > 50){
                 Rect br = boundingRect(contours[i]);
                 center = Point2d(br.x+br.width/2, br.y+br.height/2);
                 piecesCenter.push_back(center);
@@ -50,7 +50,7 @@ namespace ec2{
         vector<Vec4i> hierarchy;
         //Find contours
         findContours(frame, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
+        
         double epsilon;
         vector<Point> tmp;
         Point2d center;
