@@ -27,7 +27,7 @@ namespace ec2{
 
         Point2d center;
         for( size_t i = 0; i < contours.size(); i++ ){
-            if(contours[i].size() > 20){
+            if(contours[i].size() > 55){
                 drawContours(output, contours, i, Scalar(255,255,255), CV_FILLED);
                 Rect br = boundingRect(contours[i]);
                 center = Point2d(br.x+br.width/2, br.y+br.height/2);

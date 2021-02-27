@@ -42,44 +42,44 @@ int main(){
     getPieces(bL, left, cannyL, imageL, outputL);
     // display images
     // imshow("image", imageL);
-    imshow("canny", cannyL);
+    // imshow("canny", cannyL);
     imshow("output", outputL);
 
     getPieces(b, right, cannyR, imageR, outputR);
     // display images
     // imshow("imageR", imageR);
-    imshow("cannyR", cannyR);
+    // imshow("cannyR", cannyR);
     imshow("outputR", outputR);
 
     getPieces(b, right1, canny1, image1, output1);
     // display images
     // imshow("image1", image1);
-    imshow("canny1", canny1);
+    // imshow("canny1", canny1);
     imshow("output1", output1);
 
     
     getPieces(b, right2, canny2, image2, output2);
     // display images
     // imshow("image2", image2);
-    imshow("canny2", canny2);
+    // imshow("canny2", canny2);
     imshow("output2", output2);
 
     getPieces(b, right3, canny3, image3, output3);
     // display images
     // imshow("image3", image3);
-    imshow("canny3", canny3);
+    // imshow("canny3", canny3);
     imshow("output3", output3);
 
     getPieces(b, right4, canny4, image4, output4);
     // display images
     // imshow("image4", image4);
-    imshow("canny4", canny4);
+    // imshow("canny4", canny4);
     imshow("output4", output4);
 
     getPieces(b, right5, canny5, image5, output5);
     // display images
     // imshow("image5", image5);
-    imshow("canny5", canny5);
+    // imshow("canny5", canny5);
     imshow("output5", output5);
     //Press esc to exit the program
     waitKey(0);
@@ -148,7 +148,7 @@ void getPieces(Mat b, Mat frame, Mat &canny, Mat &image, Mat &output){
     double minX = 99999, minY=99999, maxX=0, maxY=0;
     // Draw contours.
     for (size_t i = 0; i < contours1.size(); i++){
-        if(contours1[i].size() > 20){
+        if(contours1[i].size() > 55){
             drawContours(output, contours1, i, Scalar(255,255,255), CV_FILLED);
             Rect br = boundingRect(contours1[i]);
             x = br.x+br.width/2;

@@ -61,35 +61,12 @@
     <include>
       <uri>model://pentomino_L</uri>
       <!-- if tQ == 3 -->
-      <pose>0.615 0.528 0.883 0 3.14159265359 4.31096325242</pose>
-    </include>
-    <include>
-      <uri>model://pentomino_I</uri>
-      <!-- if tQ == 3 -->
-      <pose>0.625 0.640 0.883 0 3.14159265359 4.71238898038</pose>
-    </include>
-    <include>
-      <uri>model://pentomino_W</uri>
-      <!-- if tQ == 3 -->
-      <pose>0.642 0.923 0.883 0 3.14159265359 4.71238898038</pose>
-    </include>
-    <include>
-      <uri>model://pentomino_T</uri>
-      <!-- if tQ == 3 -->
-      <pose>0.309 1.07 0.85 0 0.0 4.71238898038</pose>
-    </include>
-    <include>
-      <uri>model://pentomino_Y</uri>
-      <!-- if tQ == 3 -->
-      <pose>0.483 0.962 0.883 0 3.14159265359 4.71238898038</pose>
-    </include>
-    <include>
-      <uri>model://pentomino_Z</uri>
-      <!-- if tQ == 3 -->
-      <pose>0.605 0.754 0.883 0 3.14159265359 4.71238898038</pose>
+      <pose>0.586 0.668 0.850 0 0 -1.971889</pose>
     </include>
 
+
     <!--
+      4.31096325242
 -->
   </world>
 </sdf>

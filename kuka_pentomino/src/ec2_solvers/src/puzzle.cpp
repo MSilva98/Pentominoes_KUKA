@@ -9,10 +9,10 @@
 using namespace std;
 namespace ec2{
 
-    vector<tuple <char, int, int, double>> puzzle::getSolution(){
+    vector<tuple <char, int, int, double>> puzzle::getSolution(string filename){
 
         vector<char> names{'F', 'V', 'N', 'P', 'U', 'X', 'L'};
-        vector<vector<char> > game_sol  = readMatrixFromFile("sol2-pentamino.txt");
+        vector<vector<char> > game_sol  = readMatrixFromFile(filename);
         vector<vector<vector<char> >> pieces_temps; 
         pieces_temps.push_back(readMatrixFromFile("templates/f_matrix_template.txt"));
         pieces_temps.push_back(readMatrixFromFile("templates/v_matrix_template.txt"));

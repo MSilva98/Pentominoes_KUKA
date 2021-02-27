@@ -486,11 +486,14 @@ namespace ec2
         ROS_INFO("Grab pieces and solve puzzle...");
         Eigen::Vector3d piece_final_pos;
         double x_final_pos_puzzle, y_final_pos_puzzle;
-        std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution();
+        // std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution("sol1-pentamino.txt");
+        // std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution("sol2-pentamino.txt");
+        std::vector<std::tuple <char, int, int, double>> solution = puzzle_solver.getSolution("sol3-pentamino.txt");
         for(size_t i = 0; i < solution.size(); i++){
-            bool status_grab;
+            bool status_grab = false;
             for (size_t j = 0; j < grabPos.size(); j++){
                 if(get<0>(solution[i]) == get<0>(grabPos[j])){
+                    status_grab = false;
                     status_grab = setGripper(get<2>(grabPos[j]), get<1>(grabPos[j]), 0.2);
                 }
             }
